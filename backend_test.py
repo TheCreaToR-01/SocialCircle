@@ -190,12 +190,14 @@ class LeadBridgeAPITester:
         """Test mentor profile endpoints"""
         print("\n🔍 Testing Mentor Profile Endpoints...")
         
-        if not self.mentor_token:
-            self.log_test("Mentor Profile Tests", False, "No mentor token available")
+        # Login as mentor first
+        success, response = self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
+        if not success:
+            self.log_test("Mentor Profile Tests", False, "Failed to login as mentor")
             return
         
         # Test get mentor profile
-        success, response = self.make_request('GET', '/mentor/profile', token=self.mentor_token)
+        success, response = self.make_request('GET', '/mentor/profile')
         if success:
             mentor_profile = response.json()
             self.test_mentor_id = mentor_profile.get('mentor_id')
@@ -207,7 +209,7 @@ class LeadBridgeAPITester:
                 "expertise": ["Testing", "API Development"],
                 "experience": "5 years in testing"
             }
-            success, response = self.make_request('PUT', '/mentor/profile', update_data, token=self.mentor_token)
+            success, response = self.make_request('PUT', '/mentor/profile', update_data)
             if success:
                 self.log_test("Update Mentor Profile", True)
             else:
