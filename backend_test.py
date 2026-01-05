@@ -256,8 +256,14 @@ class LeadBridgeAPITester:
         """Test event booking flow"""
         print("\n🔍 Testing Booking Flow...")
         
-        if not self.user_token or not self.test_event_id:
-            self.log_test("Booking Flow Tests", False, "Missing user token or event ID")
+        if not self.test_event_id:
+            self.log_test("Booking Flow Tests", False, "Missing event ID")
+            return
+        
+        # Login as user
+        success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        if not success:
+            self.log_test("Booking Flow Tests", False, "Failed to login as user")
             return
         
         # Test book event
@@ -268,14 +274,14 @@ class LeadBridgeAPITester:
             "message": "Test booking message"
         }
         
-        success, response = self.make_request('POST', f'/events/{self.test_event_id}/book', booking_data, token=self.user_token)
+        success, response = self.make_request('POST', f'/events/{self.test_event_id}/book', booking_data)
         if success:
             result = response.json()
             self.test_lead_id = result.get('lead_id')
             self.log_test("Book Event", True)
             
             # Test get user bookings
-            success, response = self.make_request('GET', '/user/bookings', token=self.user_token)
+            success, response = self.make_request('GET', '/user/bookings')
             if success:
                 self.log_test("Get User Bookings", True)
             else:
