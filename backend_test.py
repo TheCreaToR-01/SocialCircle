@@ -365,21 +365,22 @@ class LeadBridgeAPITester:
         """Test role-based access control"""
         print("\n🔍 Testing Role-Based Access Control...")
         
+        # Login as user
+        self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        
         # Test user trying to access admin endpoint
-        if self.user_token:
-            success, response = self.make_request('GET', '/admin/users', token=self.user_token, expected_status=403)
-            if success:
-                self.log_test("RBAC - User blocked from admin", True)
-            else:
-                self.log_test("RBAC - User blocked from admin", False, f"Status: {response.status_code}")
+        success, response = self.make_request('GET', '/admin/users', expected_status=403)
+        if success:
+            self.log_test("RBAC - User blocked from admin", True)
+        else:
+            self.log_test("RBAC - User blocked from admin", False, f"Status: {response.status_code}")
         
         # Test user trying to access mentor endpoint
-        if self.user_token:
-            success, response = self.make_request('GET', '/mentor/profile', token=self.user_token, expected_status=403)
-            if success:
-                self.log_test("RBAC - User blocked from mentor", True)
-            else:
-                self.log_test("RBAC - User blocked from mentor", False, f"Status: {response.status_code}")
+        success, response = self.make_request('GET', '/mentor/profile', expected_status=403)
+        if success:
+            self.log_test("RBAC - User blocked from mentor", True)
+        else:
+            self.log_test("RBAC - User blocked from mentor", False, f"Status: {response.status_code}")
 
     def test_logout(self):
         """Test logout functionality"""
