@@ -1,0 +1,145 @@
+{
+  "identity": {
+    "name": "E1",
+    "archetype": "Swiss & High-Contrast with Organic Accents",
+    "principles": [
+      "Fusion over Imitation",
+      "Emotion First",
+      "Content is King",
+      "Zoom In",
+      "Negative Space",
+      "Contrast"
+    ]
+  },
+  "theme": {
+    "mode": "light",
+    "strategy": "Swiss & High-Contrast",
+    "emotional_goal": "Trust, Growth, Professionalism"
+  },
+  "typography": {
+    "headings": {
+      "family": "Outfit",
+      "weights": ["500", "700"],
+      "usage": "Headings, Hero Text, Big Numbers",
+      "letterSpacing": "tracking-tight"
+    },
+    "body": {
+      "family": "Plus Jakarta Sans",
+      "weights": ["400", "500", "600"],
+      "usage": "Paragraphs, UI Elements, Inputs",
+      "letterSpacing": "tracking-normal"
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "usage": "Code snippets, IDs, Technical Data"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#064E3B",
+        "foreground": "#FFFFFF",
+        "description": "Deep Emerald Green - Trust, Wealth, Stability"
+      },
+      "secondary": {
+        "DEFAULT": "#ECFDF5",
+        "foreground": "#064E3B",
+        "description": "Pale Mint - Backgrounds, Soft Accents"
+      },
+      "accent": {
+        "DEFAULT": "#BEF264",
+        "foreground": "#022C22",
+        "description": "Acid Lime - The 'E1 Twist', CTAs, Highlights"
+      },
+      "background": "#FFFFFF",
+      "foreground": "#0F172A",
+      "muted": "#F1F5F9",
+      "border": "#E2E8F0"
+    },
+    "gradients": {
+      "hero": "bg-gradient-to-br from-emerald-900 to-emerald-950",
+      "subtle": "bg-gradient-to-b from-white to-emerald-50/30"
+    }
+  },
+  "layout": {
+    "spacing_scale": [
+      "p-1", "p-2", "p-4", "p-6", "p-8", "p-12", "p-16", "p-20", "p-24", "p-32"
+    ],
+    "grids": {
+      "marketing": {
+        "name": "The Tetris Grid",
+        "classes": "grid grid-cols-1 md:grid-cols-12 gap-8",
+        "rules": "Asymmetry, Visual Tension. Never fill 100% perfectly."
+      },
+      "dashboard": {
+        "name": "The Control Room",
+        "classes": "grid grid-cols-1 md:grid-cols-4 gap-6",
+        "rules": "Density, Data Correlation. Every pixel utilized."
+      }
+    },
+    "container": {
+      "maxWidth": "max-w-7xl",
+      "padding": "px-6 md:px-12"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 py-6 text-lg font-medium transition-all hover:scale-[1.02] active:scale-[0.98]",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-full px-6 py-4 font-medium",
+      "outline": "border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-full px-6 py-4 font-medium transition-colors"
+    },
+    "cards": {
+      "marketing": "bg-white border border-border/50 shadow-xl shadow-emerald-900/5 rounded-2xl p-8 hover:border-emerald-500/30 transition-all duration-300",
+      "dashboard": "bg-white border border-border shadow-sm rounded-xl p-6"
+    },
+    "inputs": {
+      "style": "h-12 rounded-lg border-border bg-white px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+    }
+  },
+  "assets": {
+    "images": {
+      "hero_mentor": {
+        "url": "https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg",
+        "alt": "Professional mentor working",
+        "usage": "Hero section main image"
+      },
+      "mentor_diverse": {
+        "url": "https://images.pexels.com/photos/7581126/pexels-photo-7581126.jpeg",
+        "alt": "Diverse mentor portrait",
+        "usage": "Mentor listing or testimonials"
+      },
+      "collaboration": {
+        "url": "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg",
+        "alt": "Team collaboration meeting",
+        "usage": "About section or 'How it works'"
+      }
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "stroke-width-1.5"
+    }
+  },
+  "motion": {
+    "library": "framer-motion",
+    "transitions": {
+      "default": { "duration": 0.3, "ease": "easeOut" },
+      "slow": { "duration": 0.8, "ease": [0.16, 1, 0.3, 1] }
+    },
+    "interactions": {
+      "hover": { "scale": 1.02 },
+      "tap": { "scale": 0.98 }
+    }
+  },
+  "universal_guidelines": [
+    "Do not use generic 'SaaS Blue'. Use the defined Deep Emerald & Acid Lime.",
+    "Avoid gradients on text unless absolutely necessary for a 'hero' moment.",
+    "Use 'Outfit' font for all headings. Do not use Inter for headings.",
+    "Buttons should be 'pill' shaped (rounded-full) for marketing, and slightly rounded (rounded-lg) for dashboard.",
+    "Dashboard layouts must be dense. Marketing layouts must be spacious (2-3x normal spacing).",
+    "All interactive elements must have `data-testid` attributes.",
+    "Use `sonner` for toast notifications.",
+    "Never use transparent backgrounds for dropdowns or headers without a blur/scrim.",
+    "Ensure all text meets APCA contrast standards."
+  ],
+  "instructions_to_main_agent": "You are building a two-sided marketplace. Strictly follow the color palette and typography defined here. Use the provided image URLs for the respective sections. Implement the 'Tetris Grid' for the landing page and 'Control Room Grid' for the dashboard. Ensure the 'Acid Lime' accent is used sparingly but effectively to create the 'E1' signature look."
+}
