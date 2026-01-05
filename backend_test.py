@@ -118,23 +118,14 @@ class LeadBridgeAPITester:
         success, response = self.make_request('POST', '/auth/login', self.admin_creds, expected_status=200)
         if success:
             self.admin_user = response.json()
-            # Extract token from cookies if available
-            if 'Set-Cookie' in response.headers:
-                cookie_header = response.headers['Set-Cookie']
-                if 'session_token=' in cookie_header:
-                    self.admin_token = cookie_header.split('session_token=')[1].split(';')[0]
             self.log_test("Admin Login", True)
         else:
             self.log_test("Admin Login", False, f"Status: {response.status_code}")
         
-        # Test Mentor Login
+        # Test Mentor Login  
         success, response = self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
         if success:
             self.mentor_user = response.json()
-            if 'Set-Cookie' in response.headers:
-                cookie_header = response.headers['Set-Cookie']
-                if 'session_token=' in cookie_header:
-                    self.mentor_token = cookie_header.split('session_token=')[1].split(';')[0]
             self.log_test("Mentor Login", True)
         else:
             self.log_test("Mentor Login", False, f"Status: {response.status_code}")
@@ -143,10 +134,6 @@ class LeadBridgeAPITester:
         success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
         if success:
             self.user_user = response.json()
-            if 'Set-Cookie' in response.headers:
-                cookie_header = response.headers['Set-Cookie']
-                if 'session_token=' in cookie_header:
-                    self.user_token = cookie_header.split('session_token=')[1].split(';')[0]
             self.log_test("User Login", True)
         else:
             self.log_test("User Login", False, f"Status: {response.status_code}")
