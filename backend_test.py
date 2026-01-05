@@ -43,7 +43,7 @@ class LeadBridgeAPITester:
             self.failed_tests.append({"test": test_name, "details": details})
             print(f"❌ {test_name} - {details}")
 
-    def make_request(self, method, endpoint, data=None, token=None, expected_status=200):
+    def make_request(self, method, endpoint, data=None, token=None, expected_status=200, use_cookies=True):
         """Make HTTP request with error handling"""
         url = f"{self.base_url}/api{endpoint}"
         headers = {}
@@ -52,14 +52,25 @@ class LeadBridgeAPITester:
             headers['Authorization'] = f'Bearer {token}'
             
         try:
-            if method == 'GET':
-                response = self.session.get(url, headers=headers)
-            elif method == 'POST':
-                response = self.session.post(url, json=data, headers=headers)
-            elif method == 'PUT':
-                response = self.session.put(url, json=data, headers=headers)
-            elif method == 'DELETE':
-                response = self.session.delete(url, headers=headers)
+            # Use session for cookie-based auth or requests for token-based
+            if use_cookies:
+                if method == 'GET':
+                    response = self.session.get(url, headers=headers)
+                elif method == 'POST':
+                    response = self.session.post(url, json=data, headers=headers)
+                elif method == 'PUT':
+                    response = self.session.put(url, json=data, headers=headers)
+                elif method == 'DELETE':
+                    response = self.session.delete(url, headers=headers)
+            else:
+                if method == 'GET':
+                    response = requests.get(url, headers=headers)
+                elif method == 'POST':
+                    response = requests.post(url, json=data, headers=headers)
+                elif method == 'PUT':
+                    response = requests.put(url, json=data, headers=headers)
+                elif method == 'DELETE':
+                    response = requests.delete(url, headers=headers)
             
             success = response.status_code == expected_status
             return success, response
