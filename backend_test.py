@@ -221,12 +221,11 @@ class LeadBridgeAPITester:
         """Test mentor event management endpoints"""
         print("\n🔍 Testing Mentor Events Endpoints...")
         
-        if not self.mentor_token:
-            self.log_test("Mentor Events Tests", False, "No mentor token available")
-            return
+        # Ensure we're logged in as mentor
+        self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
         
         # Test get mentor events
-        success, response = self.make_request('GET', '/mentor/events', token=self.mentor_token)
+        success, response = self.make_request('GET', '/mentor/events')
         if success:
             self.log_test("Get Mentor Events", True)
         else:
@@ -243,7 +242,7 @@ class LeadBridgeAPITester:
             "price_per_lead": 100.0
         }
         
-        success, response = self.make_request('POST', '/mentor/events', event_data, token=self.mentor_token, expected_status=201)
+        success, response = self.make_request('POST', '/mentor/events', event_data, expected_status=201)
         if success:
             self.log_test("Create Event", True)
         else:
