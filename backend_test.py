@@ -386,12 +386,15 @@ class LeadBridgeAPITester:
         """Test logout functionality"""
         print("\n🔍 Testing Logout...")
         
-        if self.user_token:
-            success, response = self.make_request('POST', '/auth/logout', token=self.user_token)
-            if success:
-                self.log_test("User Logout", True)
-            else:
-                self.log_test("User Logout", False, f"Status: {response.status_code}")
+        # Login as user first
+        self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        
+        # Test logout
+        success, response = self.make_request('POST', '/auth/logout')
+        if success:
+            self.log_test("User Logout", True)
+        else:
+            self.log_test("User Logout", False, f"Status: {response.status_code}")
 
     def run_all_tests(self):
         """Run all tests in sequence"""
