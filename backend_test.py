@@ -139,29 +139,31 @@ class LeadBridgeAPITester:
             self.log_test("User Login", False, f"Status: {response.status_code}")
 
     def test_auth_me_endpoint(self):
-        """Test /auth/me endpoint for all user types"""
+        """Test /auth/me endpoint for all user types using cookie-based auth"""
         print("\n🔍 Testing Auth Me Endpoint...")
         
-        if self.admin_token:
-            success, response = self.make_request('GET', '/auth/me', token=self.admin_token)
-            if success and response.json().get('role') == 'ADMIN':
-                self.log_test("Auth Me - Admin", True)
-            else:
-                self.log_test("Auth Me - Admin", False, f"Status: {response.status_code}")
+        # Test with admin session
+        success, response = self.make_request('GET', '/auth/me')
+        if success and response.json().get('role') == 'ADMIN':
+            self.log_test("Auth Me - Admin", True)
+        else:
+            self.log_test("Auth Me - Admin", False, f"Status: {response.status_code}, Role: {response.json().get('role') if success else 'N/A'}")
         
-        if self.mentor_token:
-            success, response = self.make_request('GET', '/auth/me', token=self.mentor_token)
-            if success and response.json().get('role') == 'MENTOR':
-                self.log_test("Auth Me - Mentor", True)
-            else:
-                self.log_test("Auth Me - Mentor", False, f"Status: {response.status_code}")
+        # Login as mentor and test
+        self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
+        success, response = self.make_request('GET', '/auth/me')
+        if success and response.json().get('role') == 'MENTOR':
+            self.log_test("Auth Me - Mentor", True)
+        else:
+            self.log_test("Auth Me - Mentor", False, f"Status: {response.status_code}, Role: {response.json().get('role') if success else 'N/A'}")
         
-        if self.user_token:
-            success, response = self.make_request('GET', '/auth/me', token=self.user_token)
-            if success and response.json().get('role') == 'USER':
-                self.log_test("Auth Me - User", True)
-            else:
-                self.log_test("Auth Me - User", False, f"Status: {response.status_code}")
+        # Login as user and test
+        self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        success, response = self.make_request('GET', '/auth/me')
+        if success and response.json().get('role') == 'USER':
+            self.log_test("Auth Me - User", True)
+        else:
+            self.log_test("Auth Me - User", False, f"Status: {response.status_code}, Role: {response.json().get('role') if success else 'N/A'}")
 
     def test_events_endpoints(self):
         """Test event-related endpoints"""
