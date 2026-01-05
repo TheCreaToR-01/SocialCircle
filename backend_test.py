@@ -307,19 +307,21 @@ class LeadBridgeAPITester:
         """Test admin endpoints"""
         print("\n🔍 Testing Admin Endpoints...")
         
-        if not self.admin_token:
-            self.log_test("Admin Tests", False, "No admin token available")
+        # Login as admin
+        success, response = self.make_request('POST', '/auth/login', self.admin_creds, expected_status=200)
+        if not success:
+            self.log_test("Admin Tests", False, "Failed to login as admin")
             return
         
         # Test get all users
-        success, response = self.make_request('GET', '/admin/users', token=self.admin_token)
+        success, response = self.make_request('GET', '/admin/users')
         if success:
             self.log_test("Get All Users", True)
         else:
             self.log_test("Get All Users", False, f"Status: {response.status_code}")
         
         # Test get all mentors
-        success, response = self.make_request('GET', '/admin/mentors', token=self.admin_token)
+        success, response = self.make_request('GET', '/admin/mentors')
         if success:
             mentors = response.json()
             self.log_test("Get All Mentors", True)
@@ -327,7 +329,7 @@ class LeadBridgeAPITester:
             # Test mentor verification if we have a mentor
             if mentors and self.test_mentor_id:
                 verify_data = {"status": "APPROVED"}
-                success, response = self.make_request('PUT', f'/admin/mentors/{self.test_mentor_id}/verify', verify_data, token=self.admin_token)
+                success, response = self.make_request('PUT', f'/admin/mentors/{self.test_mentor_id}/verify', verify_data)
                 if success:
                     self.log_test("Verify Mentor", True)
                 else:
@@ -336,7 +338,7 @@ class LeadBridgeAPITester:
             self.log_test("Get All Mentors", False, f"Status: {response.status_code}")
         
         # Test get all leads
-        success, response = self.make_request('GET', '/admin/leads', token=self.admin_token)
+        success, response = self.make_request('GET', '/admin/leads')
         if success:
             leads = response.json()
             self.log_test("Get All Leads", True)
@@ -344,7 +346,7 @@ class LeadBridgeAPITester:
             # Test lead verification if we have a lead
             if leads and self.test_lead_id:
                 verify_data = {"status": "VERIFIED"}
-                success, response = self.make_request('PUT', f'/admin/leads/{self.test_lead_id}/verify', verify_data, token=self.admin_token)
+                success, response = self.make_request('PUT', f'/admin/leads/{self.test_lead_id}/verify', verify_data)
                 if success:
                     self.log_test("Verify Lead", True)
                 else:
@@ -353,7 +355,7 @@ class LeadBridgeAPITester:
             self.log_test("Get All Leads", False, f"Status: {response.status_code}")
         
         # Test analytics
-        success, response = self.make_request('GET', '/admin/analytics', token=self.admin_token)
+        success, response = self.make_request('GET', '/admin/analytics')
         if success:
             self.log_test("Get Analytics", True)
         else:
