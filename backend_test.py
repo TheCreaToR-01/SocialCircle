@@ -293,12 +293,11 @@ class LeadBridgeAPITester:
         """Test mentor leads endpoints"""
         print("\n🔍 Testing Mentor Leads Endpoints...")
         
-        if not self.mentor_token:
-            self.log_test("Mentor Leads Tests", False, "No mentor token available")
-            return
+        # Login as mentor
+        self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
         
         # Test get mentor leads
-        success, response = self.make_request('GET', '/mentor/leads', token=self.mentor_token)
+        success, response = self.make_request('GET', '/mentor/leads')
         if success:
             self.log_test("Get Mentor Leads", True)
         else:
