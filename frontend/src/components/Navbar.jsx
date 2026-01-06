@@ -24,7 +24,7 @@ function Navbar({ user }) {
     <nav className="bg-white border-b border-border">
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex items-center justify-between">
         <Link to="/" className="text-2xl font-heading font-bold text-primary" data-testid="navbar-logo">
-          LeadBridge
+          Social Circle
         </Link>
         
         <div className="flex items-center gap-4">
