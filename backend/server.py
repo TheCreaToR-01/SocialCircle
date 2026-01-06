@@ -558,7 +558,11 @@ async def exchange_session(data: SessionRequest):
         user_id = existing_user["user_id"]
         await db.users.update_one(
             {"user_id": user_id},
-            {"$set": {"name": session_data["name"], "picture": session_data["picture"]}}
+            {"$set": {
+                "name": session_data["name"],
+                "picture": session_data["picture"],
+                "email_verified": True
+            }}
         )
     else:
         user_id = f"user_{uuid.uuid4().hex[:12]}"
@@ -568,6 +572,7 @@ async def exchange_session(data: SessionRequest):
             "name": session_data["name"],
             "picture": session_data.get("picture"),
             "role": "USER",
+            "email_verified": True,
             "created_at": datetime.now(timezone.utc)
         }
         await db.users.insert_one(user_doc)
@@ -587,6 +592,7 @@ async def exchange_session(data: SessionRequest):
         "email": user_doc["email"],
         "name": user_doc["name"],
         "role": user_doc["role"],
+        "email_verified": user_doc.get("email_verified", True),
         "picture": user_doc.get("picture")
     })
     response.set_cookie(
@@ -599,6 +605,26 @@ async def exchange_session(data: SessionRequest):
         max_age=7*24*60*60
     )
     return response
+
+@api_router.get("/auth/verify-email/{token}")
+async def verify_email(token: str):
+    user = await db.users.find_one({
+        "verification_token": token,
+        "verification_token_expires": {"$gt": datetime.now(timezone.utc)}
+    }, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired verification token")
+    
+    await db.users.update_one(
+        {"user_id": user["user_id"]},
+        {
+            "$set": {"email_verified": True},
+            "$unset": {"verification_token": "", "verification_token_expires": ""}
+        }
+    )
+    
+    return {"message": "Email verified successfully"}
 
 @api_router.get("/auth/me")
 async def get_me(request: Request, session_token: Optional[str] = Cookie(None), authorization: Optional[str] = None):
