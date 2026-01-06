@@ -711,6 +711,34 @@ async def book_event(event_id: str, data: BookingCreate, user: User = Depends(ge
         {"$inc": {"available_slots": -1}}
     )
     
+    # Send booking confirmation email
+    event_date = event.get("event_datetime", datetime.now(timezone.utc))
+    if isinstance(event_date, str):
+        event_date = datetime.fromisoformat(event_date)
+    html_content = create_booking_confirmation_email(
+        data.name,
+        event.get("title", "Event"),
+        event_date.strftime("%B %d, %Y at %I:%M %p")
+    )
+    await send_email_async(data.email, "Booking Confirmed - LeadBridge", html_content)
+    
+    # Notify mentor of new lead if auto-verified
+    if verification_status == "AUTO_VERIFIED":
+        mentor = await db.mentors.find_one({"mentor_id": event.get("mentor_id")}, {"_id": 0})
+        if mentor:
+            mentor_user = await db.users.find_one({"user_id": mentor["user_id"]}, {"_id": 0})
+            if mentor_user:
+                lead_count = await db.leads.count_documents({
+                    "event_id": event_id,
+                    "status": "VERIFIED"
+                })
+                html_content = create_lead_notification_email(
+                    mentor_user["name"],
+                    event.get("title", "Your Event"),
+                    lead_count
+                )
+                await send_email_async(mentor_user["email"], "New Verified Lead - LeadBridge", html_content)
+    
     return {"lead_id": lead_id, "message": "Booking successful"}
 
 @api_router.get("/user/bookings")
