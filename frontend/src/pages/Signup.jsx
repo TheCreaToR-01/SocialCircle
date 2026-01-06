@@ -35,13 +35,20 @@ function Signup() {
         { withCredentials: true }
       );
 
-      toast.success('Account created successfully!');
-      const user = response.data;
-
-      if (user.role === 'USER') {
-        navigate('/user/dashboard');
-      } else if (user.role === 'MENTOR') {
-        navigate('/mentor/dashboard');
+      const data = response.data;
+      
+      if (!data.email_verified) {
+        toast.success('Account created! Please check your email to verify your account.');
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } else {
+        toast.success('Account created successfully!');
+        if (data.role === 'USER') {
+          navigate('/user/dashboard');
+        } else if (data.role === 'MENTOR') {
+          navigate('/mentor/dashboard');
+        }
       }
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Signup failed');
