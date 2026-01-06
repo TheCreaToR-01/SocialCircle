@@ -129,11 +129,13 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="bg-emerald-900 text-white py-12">
+      <footer className="bg-primary text-white py-12">
         <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
-          <p className="text-emerald-200">&copy; 2025 LeadBridge. All rights reserved.</p>
+          <p className="text-blue-200">&copy; 2025 LeadBridge. All rights reserved.</p>
         </div>
       </footer>
+      
+      <Footer />
     </div>
   );
 }
