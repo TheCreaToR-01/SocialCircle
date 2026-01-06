@@ -187,41 +187,72 @@ function MentorDashboard() {
         { withCredentials: true }
       );
 
-      const options = {
-        key: orderResponse.data.key,
-        amount: orderResponse.data.amount,
-        currency: orderResponse.data.currency,
-        order_id: orderResponse.data.order_id,
-        name: 'LeadBridge',
-        description: `Purchase lead for ${lead.event_title}`,
-        handler: async function (response) {
-          try {
-            await axios.post(
-              `${BACKEND_URL}/api/mentor/payment-verify`,
-              {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-              },
-              { withCredentials: true }
-            );
-            toast.success('Lead purchased successfully!');
-            fetchData();
-          } catch (error) {
-            toast.error('Payment verification failed');
-          }
-        },
-        prefill: {
-          name: user.name,
-          email: user.email,
-        },
-        theme: {
-          color: '#064E3B',
-        },
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
+      // DEMO PAYMENT GATEWAY - Show payment code dialog
+      const demoCode = orderResponse.data.demo_payment_code;
+      const paymentId = orderResponse.data.payment_id;
+      const amount = orderResponse.data.amount;
+      
+      // Show simple prompt for demo code entry
+      const enteredCode = window.prompt(
+        `Demo Payment Gateway\n\nAmount: ₹${amount}\n\nYour payment code is: ${demoCode}\n\nEnter the code above to complete payment:`,
+        ''
+      );
+      
+      if (enteredCode === demoCode) {
+        // Verify payment
+        try {
+          await axios.post(
+            `${BACKEND_URL}/api/mentor/payment-verify`,
+            {
+              demo_payment_code: enteredCode,
+              payment_id: paymentId
+            },
+            { withCredentials: true }
+          );
+          toast.success('Lead purchased successfully! Check your email for lead details.');
+          fetchData();
+        } catch (error) {
+          toast.error('Payment verification failed');
+        }
+      } else if (enteredCode !== null) {
+        toast.error('Invalid payment code. Please try again.');
+      }
+      
+      // COMMENTED OUT: Real Razorpay integration
+      // const options = {
+      //   key: orderResponse.data.key,
+      //   amount: orderResponse.data.amount,
+      //   currency: orderResponse.data.currency,
+      //   order_id: orderResponse.data.order_id,
+      //   name: 'LeadBridge',
+      //   description: `Purchase lead for ${lead.event_title}`,
+      //   handler: async function (response) {
+      //     try {
+      //       await axios.post(
+      //         `${BACKEND_URL}/api/mentor/payment-verify`,
+      //         {
+      //           razorpay_payment_id: response.razorpay_payment_id,
+      //           razorpay_order_id: response.razorpay_order_id,
+      //           razorpay_signature: response.razorpay_signature,
+      //         },
+      //         { withCredentials: true }
+      //       );
+      //       toast.success('Lead purchased successfully!');
+      //       fetchData();
+      //     } catch (error) {
+      //       toast.error('Payment verification failed');
+      //     }
+      //   },
+      //   prefill: {
+      //     name: user.name,
+      //     email: user.email,
+      //   },
+      //   theme: {
+      //     color: '#064E3B',
+      //   },
+      // };
+      // const razorpay = new window.Razorpay(options);
+      // razorpay.open();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to initiate purchase');
     }
