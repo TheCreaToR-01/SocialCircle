@@ -449,6 +449,7 @@ async def register(data: RegisterRequest):
     
     user_id = f"user_{uuid.uuid4().hex[:12]}"
     password_hash = hash_password(data.password)
+    verification_token = generate_verification_token()
     
     user_doc = {
         "user_id": user_id,
@@ -456,6 +457,9 @@ async def register(data: RegisterRequest):
         "name": data.name,
         "password_hash": password_hash,
         "role": data.role.value,
+        "email_verified": False,
+        "verification_token": verification_token,
+        "verification_token_expires": datetime.now(timezone.utc) + timedelta(hours=24),
         "created_at": datetime.now(timezone.utc)
     }
     
@@ -471,6 +475,11 @@ async def register(data: RegisterRequest):
         }
         await db.mentors.insert_one(mentor_doc)
     
+    # Send verification email
+    verification_link = f"{FRONTEND_URL}/verify-email?token={verification_token}"
+    html_content = create_verification_email(data.name, verification_link)
+    await send_email_async(data.email, "Verify Your LeadBridge Account", html_content)
+    
     session_token = f"session_{uuid.uuid4().hex}"
     session_doc = {
         "user_id": user_id,
@@ -480,7 +489,14 @@ async def register(data: RegisterRequest):
     }
     await db.user_sessions.insert_one(session_doc)
     
-    response = JSONResponse(content={"user_id": user_id, "email": data.email, "name": data.name, "role": data.role.value})
+    response = JSONResponse(content={
+        "user_id": user_id,
+        "email": data.email,
+        "name": data.name,
+        "role": data.role.value,
+        "email_verified": False,
+        "message": "Registration successful! Please check your email to verify your account."
+    })
     response.set_cookie(
         key="session_token",
         value=session_token,
