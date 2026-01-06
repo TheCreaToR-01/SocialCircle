@@ -40,7 +40,7 @@ function Landing() {
                 Connect with Expert Mentors.
                 <span className="block text-accent"> Get Quality Leads.</span>
               </h1>
-              <p className="text-lg md:text-xl text-emerald-100 mb-8 max-w-2xl">
+              <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl">
                 A two-sided marketplace where mentors meet learners. Book sessions as a user, or grow your business as a mentor with verified leads.
               </p>
               <div className="flex flex-wrap gap-4">
