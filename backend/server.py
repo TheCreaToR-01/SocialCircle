@@ -56,6 +56,7 @@ class User(BaseModel):
     name: str
     picture: Optional[str] = None
     role: Role
+    email_verified: bool = False
     created_at: datetime
 
 class RegisterRequest(BaseModel):
