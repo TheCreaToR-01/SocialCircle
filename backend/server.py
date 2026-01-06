@@ -950,36 +950,141 @@ async def verify_payment(request: Request, user: User = Depends(get_current_user
     await require_role(user, [Role.MENTOR])
     
     body = await request.json()
-    razorpay_payment_id = body.get("razorpay_payment_id")
-    razorpay_order_id = body.get("razorpay_order_id")
-    razorpay_signature = body.get("razorpay_signature")
+    demo_payment_code = body.get("demo_payment_code")
+    payment_id = body.get("payment_id")
     
-    try:
-        razorpay_client.utility.verify_payment_signature({
-            'razorpay_order_id': razorpay_order_id,
-            'razorpay_payment_id': razorpay_payment_id,
-            'razorpay_signature': razorpay_signature
-        })
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Invalid payment signature")
+    if not demo_payment_code or not payment_id:
+        raise HTTPException(status_code=400, detail="Missing payment details")
     
-    payment = await db.payments.find_one({"razorpay_order_id": razorpay_order_id}, {"_id": 0})
+    # DEMO PAYMENT VERIFICATION
+    payment = await db.payments.find_one({"payment_id": payment_id}, {"_id": 0})
     if not payment:
         raise HTTPException(status_code=404, detail="Payment not found")
     
+    # Verify demo code matches
+    if payment.get("demo_payment_code") != demo_payment_code:
+        raise HTTPException(status_code=400, detail="Invalid payment code")
+    
+    # Update payment status
     await db.payments.update_one(
-        {"payment_id": payment["payment_id"]},
-        {"$set": {"razorpay_payment_id": razorpay_payment_id, "status": "COMPLETED"}}
+        {"payment_id": payment_id},
+        {"$set": {"status": "COMPLETED", "completed_at": datetime.now(timezone.utc)}}
     )
     
+    # Update lead status
     mentor = await db.mentors.find_one({"user_id": user.user_id}, {"_id": 0})
     await db.leads.update_one(
         {"lead_id": payment["lead_id"]},
-        {"$set": {"status": "PURCHASED", "purchased_by": mentor["mentor_id"], "payment_id": payment["payment_id"]}}
+        {"$set": {
+            "status": "PURCHASED",
+            "purchased_by": mentor["mentor_id"],
+            "payment_id": payment_id,
+            "purchased_at": datetime.now(timezone.utc)
+        }}
     )
     
+    # Get lead details to send email
     lead = await db.leads.find_one({"lead_id": payment["lead_id"]}, {"_id": 0})
-    return {"message": "Payment verified", "lead": lead}
+    event = await db.events.find_one({"event_id": lead["event_id"]}, {"_id": 0})
+    
+    # Send email with lead details
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #0A1628 0%, #243B53 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Lead Purchase Successful!</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 40px;">
+                                <h2 style="color: #0A1628; margin-top: 0;">Hi {user.name},</h2>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    You have successfully purchased a lead for your event: <strong>{event.get("title", "")}</strong>
+                                </p>
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F3F4F6; border-radius: 6px; padding: 20px; margin: 20px 0;">
+                                    <tr>
+                                        <td>
+                                            <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px;"><strong>Lead Details:</strong></p>
+                                            <p style="margin: 0 0 10px 0; color: #0A1628;"><strong>Name:</strong> {lead.get("name")}</p>
+                                            <p style="margin: 0 0 10px 0; color: #0A1628;"><strong>Email:</strong> {lead.get("email")}</p>
+                                            <p style="margin: 0 0 10px 0; color: #0A1628;"><strong>Phone:</strong> {lead.get("phone")}</p>
+                                            {('<p style="margin: 0; color: #0A1628;"><strong>Message:</strong> ' + lead.get("message", "") + '</p>') if lead.get("message") else ''}
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    Amount Paid: <strong>₹{payment.get("amount", 0)}</strong><br>
+                                    Payment Code: <strong>{demo_payment_code}</strong>
+                                </p>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    You can now reach out to this potential student directly!
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #F3F4F6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+                                <p style="color: #6B7280; font-size: 12px; margin: 0;">
+                                    © 2025 LeadBridge. All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+    
+    await send_email_async(
+        user.email,
+        f"Lead Purchase Receipt - {event.get('title', 'Event')}",
+        html_content
+    )
+    
+    return {"message": "Payment verified successfully", "lead": lead}
+    
+    # COMMENTED OUT: Real Razorpay verification
+    # razorpay_payment_id = body.get("razorpay_payment_id")
+    # razorpay_order_id = body.get("razorpay_order_id")
+    # razorpay_signature = body.get("razorpay_signature")
+    # 
+    # try:
+    #     razorpay_client.utility.verify_payment_signature({
+    #         'razorpay_order_id': razorpay_order_id,
+    #         'razorpay_payment_id': razorpay_payment_id,
+    #         'razorpay_signature': razorpay_signature
+    #     })
+    # except Exception as e:
+    #     raise HTTPException(status_code=400, detail="Invalid payment signature")
+    # 
+    # payment = await db.payments.find_one({"razorpay_order_id": razorpay_order_id}, {"_id": 0})
+    # if not payment:
+    #     raise HTTPException(status_code=404, detail="Payment not found")
+    # 
+    # await db.payments.update_one(
+    #     {"payment_id": payment["payment_id"]},
+    #     {"$set": {"razorpay_payment_id": razorpay_payment_id, "status": "COMPLETED"}}
+    # )
+    # 
+    # mentor = await db.mentors.find_one({"user_id": user.user_id}, {"_id": 0})
+    # await db.leads.update_one(
+    #     {"lead_id": payment["lead_id"]},
+    #     {"$set": {"status": "PURCHASED", "purchased_by": mentor["mentor_id"], "payment_id": payment["payment_id"]}}
+    # )
+    # 
+    # lead = await db.leads.find_one({"lead_id": payment["lead_id"]}, {"_id": 0})
+    # return {"message": "Payment verified", "lead": lead}
 
 @api_router.get("/admin/users")
 async def get_all_users(user: User = Depends(get_current_user)):
