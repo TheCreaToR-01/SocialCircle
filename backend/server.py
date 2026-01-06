@@ -991,6 +991,13 @@ async def verify_mentor(mentor_id: str, data: VerifyMentorRequest, user: User = 
         {"$set": {"verification_status": data.status}}
     )
     
+    # Send notification email to mentor
+    mentor_user = await db.users.find_one({"user_id": mentor["user_id"]}, {"_id": 0})
+    if mentor_user:
+        html_content = create_mentor_approval_email(mentor_user["name"], data.status)
+        subject = "Application Approved - LeadBridge" if data.status == "APPROVED" else "Application Update - LeadBridge"
+        await send_email_async(mentor_user["email"], subject, html_content)
+    
     return {"message": "Mentor verification updated"}
 
 @api_router.get("/admin/leads")
