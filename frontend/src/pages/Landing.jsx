@@ -32,7 +32,7 @@ function Landing() {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      <section className="bg-gradient-to-br from-emerald-900 to-emerald-950 text-white py-20" data-testid="hero-section">
+      <section className="bg-gradient-to-br from-primary to-navy-700 text-white py-20" data-testid="hero-section">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
             <div className="md:col-span-7">
