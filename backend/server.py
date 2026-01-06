@@ -172,6 +172,243 @@ def validate_phone(phone: str) -> bool:
     pattern = r'^[0-9]{10,15}$'
     return re.match(pattern, phone.replace('+', '').replace('-', '').replace(' ', '')) is not None
 
+async def send_email_async(to_email: str, subject: str, html_content: str):
+    """Send email using Resend API (async wrapper)"""
+    if not resend.api_key or resend.api_key == '':
+        logger.warning("Resend API key not configured, skipping email")
+        return None
+    
+    params = {
+        "from": SENDER_EMAIL,
+        "to": [to_email],
+        "subject": subject,
+        "html": html_content
+    }
+    
+    try:
+        email = await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Email sent to {to_email}: {email.get('id')}")
+        return email
+    except Exception as e:
+        logger.error(f"Failed to send email to {to_email}: {str(e)}")
+        return None
+
+def generate_verification_token() -> str:
+    """Generate secure random token for email verification"""
+    return secrets.token_urlsafe(32)
+
+def create_verification_email(name: str, verification_link: str) -> str:
+    """Create HTML email for account verification"""
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #064E3B 0%, #065F46 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">LeadBridge</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 40px;">
+                                <h2 style="color: #064E3B; margin-top: 0;">Welcome to LeadBridge, {name}!</h2>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    Thank you for signing up. Please verify your email address to activate your account and start connecting with mentors.
+                                </p>
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                                    <tr>
+                                        <td align="center">
+                                            <a href="{verification_link}" style="background-color: #064E3B; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                                                Verify Email Address
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p style="color: #6B7280; font-size: 14px; line-height: 1.6;">
+                                    If the button doesn't work, copy and paste this link into your browser:<br>
+                                    <a href="{verification_link}" style="color: #064E3B; word-break: break-all;">{verification_link}</a>
+                                </p>
+                                <p style="color: #6B7280; font-size: 14px; line-height: 1.6; margin-top: 30px;">
+                                    This link will expire in 24 hours for security reasons.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #F3F4F6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+                                <p style="color: #6B7280; font-size: 12px; margin: 0;">
+                                    © 2025 LeadBridge. All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+def create_booking_confirmation_email(user_name: str, event_title: str, event_date: str) -> str:
+    """Create HTML email for booking confirmation"""
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #064E3B 0%, #065F46 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Booking Confirmed!</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 40px;">
+                                <h2 style="color: #064E3B; margin-top: 0;">Hi {user_name},</h2>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    Your booking has been successfully submitted and is now under review.
+                                </p>
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F3F4F6; border-radius: 6px; padding: 20px; margin: 20px 0;">
+                                    <tr>
+                                        <td>
+                                            <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px;"><strong>Event:</strong></p>
+                                            <p style="margin: 0 0 15px 0; color: #064E3B; font-size: 16px; font-weight: bold;">{event_title}</p>
+                                            <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px;"><strong>Date:</strong></p>
+                                            <p style="margin: 0; color: #374151; font-size: 14px;">{event_date}</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    Your contact details will be verified and shared with the mentor. You'll receive a notification once the mentor reviews your booking.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #F3F4F6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+                                <p style="color: #6B7280; font-size: 12px; margin: 0;">
+                                    © 2025 LeadBridge. All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+def create_mentor_approval_email(mentor_name: str, status: str) -> str:
+    """Create HTML email for mentor approval/rejection"""
+    is_approved = status == "APPROVED"
+    title = "Application Approved!" if is_approved else "Application Update"
+    message = "Congratulations! Your mentor application has been approved." if is_approved else "Thank you for your interest. Unfortunately, your mentor application was not approved at this time."
+    
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #064E3B 0%, #065F46 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">{title}</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 40px;">
+                                <h2 style="color: #064E3B; margin-top: 0;">Hi {mentor_name},</h2>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    {message}
+                                </p>
+                                {('<p style="color: #374151; font-size: 16px; line-height: 1.6;">You can now create events and start receiving verified leads from potential students!</p>' if is_approved else '')}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #F3F4F6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+                                <p style="color: #6B7280; font-size: 12px; margin: 0;">
+                                    © 2025 LeadBridge. All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+def create_lead_notification_email(mentor_name: str, event_title: str, lead_count: int) -> str:
+    """Create HTML email for new lead notification to mentor"""
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0;">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #064E3B 0%, #065F46 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">New Verified Lead!</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 40px;">
+                                <h2 style="color: #064E3B; margin-top: 0;">Hi {mentor_name},</h2>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    Great news! You have {lead_count} new verified lead(s) for your event:
+                                </p>
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F3F4F6; border-radius: 6px; padding: 20px; margin: 20px 0;">
+                                    <tr>
+                                        <td>
+                                            <p style="margin: 0; color: #064E3B; font-size: 18px; font-weight: bold;">{event_title}</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    Visit your dashboard to purchase and access the lead's contact details.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #F3F4F6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+                                <p style="color: #6B7280; font-size: 12px; margin: 0;">
+                                    © 2025 LeadBridge. All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
 async def get_current_user(request: Request, session_token: Optional[str] = Cookie(None), authorization: Optional[str] = None) -> User:
     token = session_token
     if not token and authorization:
