@@ -24,6 +24,7 @@ function AppRouter() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/user/dashboard" element={<UserDashboard />} />
         <Route path="/mentor/dashboard" element={<MentorDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
