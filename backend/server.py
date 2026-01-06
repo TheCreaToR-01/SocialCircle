@@ -896,32 +896,54 @@ async def purchase_lead(lead_id: str, user: User = Depends(get_current_user)):
     if event.get("mentor_id") != mentor.get("mentor_id"):
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    amount = int(event.get("price_per_lead", 0) * 100)
+    amount = event.get("price_per_lead", 0)
     
-    razorpay_order = razorpay_client.order.create({
-        "amount": amount,
-        "currency": "INR",
-        "payment_capture": 1
-    })
-    
+    # DEMO PAYMENT GATEWAY (Razorpay commented out for prototype)
+    # Create demo payment record
     payment_id = f"payment_{uuid.uuid4().hex[:12]}"
+    demo_payment_code = f"DEMO{uuid.uuid4().hex[:6].upper()}"
+    
     payment_doc = {
         "payment_id": payment_id,
         "mentor_id": mentor["mentor_id"],
         "lead_id": lead_id,
-        "razorpay_order_id": razorpay_order["id"],
-        "amount": event.get("price_per_lead", 0),
-        "status": "CREATED",
+        "demo_payment_code": demo_payment_code,
+        "amount": amount,
+        "status": "PENDING",
         "created_at": datetime.now(timezone.utc)
     }
     await db.payments.insert_one(payment_doc)
     
+    # Return demo payment code to frontend
     return {
-        "order_id": razorpay_order["id"],
+        "payment_id": payment_id,
+        "demo_payment_code": demo_payment_code,
         "amount": amount,
-        "currency": "INR",
-        "key": os.environ.get('RAZORPAY_KEY_ID', '')
+        "message": "Use this demo code to complete payment"
     }
+    
+    # COMMENTED OUT: Real Razorpay integration
+    # razorpay_order = razorpay_client.order.create({
+    #     "amount": int(amount * 100),
+    #     "currency": "INR",
+    #     "payment_capture": 1
+    # })
+    # payment_doc = {
+    #     "payment_id": payment_id,
+    #     "mentor_id": mentor["mentor_id"],
+    #     "lead_id": lead_id,
+    #     "razorpay_order_id": razorpay_order["id"],
+    #     "amount": amount,
+    #     "status": "CREATED",
+    #     "created_at": datetime.now(timezone.utc)
+    # }
+    # await db.payments.insert_one(payment_doc)
+    # return {
+    #     "order_id": razorpay_order["id"],
+    #     "amount": int(amount * 100),
+    #     "currency": "INR",
+    #     "key": os.environ.get('RAZORPAY_KEY_ID', '')
+    # }
 
 @api_router.post("/mentor/payment-verify")
 async def verify_payment(request: Request, user: User = Depends(get_current_user)):
