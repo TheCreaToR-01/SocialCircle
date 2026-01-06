@@ -33,6 +33,10 @@ function AppRouter() {
         <Route path="/mentor/dashboard" element={<MentorDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/events/:eventId" element={<EventDetail />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-conditions" element={<TermsConditions />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
       <Toaster position="top-right" richColors />
     </>
