@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import EventCard from '../components/EventCard';
 import { Button } from '../components/ui/button';
 import { ArrowRight, TrendingUp, Shield, Zap } from 'lucide-react';
