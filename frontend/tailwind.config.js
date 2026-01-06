@@ -8,16 +8,16 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#064E3B',
+          DEFAULT: '#0A1628',
           foreground: '#FFFFFF',
         },
         secondary: {
-          DEFAULT: '#ECFDF5',
-          foreground: '#064E3B',
+          DEFAULT: '#F0F4F8',
+          foreground: '#0A1628',
         },
         accent: {
-          DEFAULT: '#BEF264',
-          foreground: '#022C22',
+          DEFAULT: '#3B82F6',
+          foreground: '#FFFFFF',
         },
         background: '#FFFFFF',
         foreground: '#0F172A',
@@ -26,6 +26,18 @@ module.exports = {
         destructive: {
           DEFAULT: '#EF4444',
           foreground: '#FFFFFF',
+        },
+        navy: {
+          50: '#F0F4F8',
+          100: '#D9E2EC',
+          200: '#BCCCDC',
+          300: '#9FB3C8',
+          400: '#829AB1',
+          500: '#627D98',
+          600: '#486581',
+          700: '#334E68',
+          800: '#243B53',
+          900: '#0A1628',
         },
       },
       fontFamily: {
