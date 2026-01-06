@@ -9,6 +9,10 @@ import UserDashboard from './pages/UserDashboard';
 import MentorDashboard from './pages/MentorDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EventDetail from './pages/EventDetail';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import RefundPolicy from './pages/RefundPolicy';
+import Contact from './pages/Contact';
 import { Toaster } from 'sonner';
 
 function AppRouter() {
