@@ -61,8 +61,11 @@ function Signup() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-950 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8" data-testid="signup-form">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-bold text-primary mb-2">Create Account</h1>
-          <p className="text-muted-foreground">Join LeadBridge today</p>
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-white text-2xl font-heading font-bold">S</span>
+          </div>
+          <h1 className="text-3xl font-heading font-bold text-primary mb-2">Join The Social Circle</h1>
+          <p className="text-muted-foreground">Create meaningful connections</p>
         </div>
 
         <form onSubmit={handleEmailSignup} className="space-y-6">
