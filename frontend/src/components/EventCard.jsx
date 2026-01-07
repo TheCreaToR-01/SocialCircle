@@ -34,11 +34,11 @@ function EventCard({ event }) {
         </div>
         <div className="flex items-center gap-2 text-sm text-foreground">
           <User className="w-4 h-4 text-primary" />
-          <span>{event.mentor_name}</span>
+          <span>Hosted by {event.mentor_name}</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-foreground">
           <DollarSign className="w-4 h-4 text-primary" />
-          <span>₹{event.price_per_lead} per lead</span>
+          <span>₹{event.price_per_lead} per person</span>
         </div>
       </div>
       
