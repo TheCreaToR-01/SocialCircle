@@ -112,14 +112,14 @@ function Signup() {
           </div>
 
           <div>
-            <Label htmlFor="role">I am a</Label>
+            <Label htmlFor="role">I want to</Label>
             <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
               <SelectTrigger className="mt-2" data-testid="role-select">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="USER" data-testid="role-user">User (Learner)</SelectItem>
-                <SelectItem value="MENTOR" data-testid="role-mentor">Mentor</SelectItem>
+                <SelectItem value="USER" data-testid="role-user">Attend Dinners (Guest)</SelectItem>
+                <SelectItem value="MENTOR" data-testid="role-mentor">Host Experiences (Host)</SelectItem>
               </SelectContent>
             </Select>
           </div>
