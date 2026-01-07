@@ -51,8 +51,11 @@ function Login() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-950 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8" data-testid="login-form">
         <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-white text-2xl font-heading font-bold">S</span>
+          </div>
           <h1 className="text-3xl font-heading font-bold text-primary mb-2">Welcome Back</h1>
-          <p className="text-muted-foreground">Sign in to your account</p>
+          <p className="text-muted-foreground">Sign in to The Social Circle</p>
         </div>
 
         <form onSubmit={handleEmailLogin} className="space-y-6">
