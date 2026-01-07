@@ -10,31 +10,36 @@ function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img src="/logo.png" alt="LeadBridge Logo" className="h-10 w-10" />
-              <h3 className="text-2xl font-heading font-bold">LeadBridge</h3>
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <span className="text-primary text-xl font-heading font-bold">S</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-heading font-bold">The Social Circle</h3>
+                <p className="text-xs opacity-90">Real Connections. Curated Dinners.</p>
+              </div>
             </div>
-            <p className="text-sm opacity-90">
-              Connecting mentors with learners through verified lead acquisition.
+            <p className="text-sm opacity-90 mt-4">
+              Curating meaningful connections in a digital world. Currently operating in Delhi NCR.
             </p>
           </div>
           
           {/* Quick Links */}
           <div>
-            <h4 className="font-heading font-bold mb-4">Quick Links</h4>
+            <h4 className="font-heading font-bold mb-4">Explore</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/" className="opacity-90 hover:opacity-100 hover:underline transition-opacity">
-                  Home
+                  Browse Dinners
                 </Link>
               </li>
               <li>
                 <Link to="/signup" className="opacity-90 hover:opacity-100 hover:underline transition-opacity">
-                  Become a Mentor
+                  Become a Host
                 </Link>
               </li>
               <li>
                 <Link to="/login" className="opacity-90 hover:opacity-100 hover:underline transition-opacity">
-                  Sign In
+                  Log In
                 </Link>
               </li>
               <li>
@@ -47,7 +52,7 @@ function Footer() {
           
           {/* Legal */}
           <div>
-            <h4 className="font-heading font-bold mb-4">Legal</h4>
+            <h4 className="font-heading font-bold mb-4">Trust & Safety</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/privacy-policy" className="opacity-90 hover:opacity-100 hover:underline transition-opacity">
@@ -56,7 +61,7 @@ function Footer() {
               </li>
               <li>
                 <Link to="/terms-conditions" className="opacity-90 hover:opacity-100 hover:underline transition-opacity">
-                  Terms & Conditions
+                  Terms of Service
                 </Link>
               </li>
               <li>
@@ -69,19 +74,19 @@ function Footer() {
           
           {/* Contact */}
           <div>
-            <h4 className="font-heading font-bold mb-4">Contact</h4>
+            <h4 className="font-heading font-bold mb-4">Get in Touch</h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2 opacity-90">
                 <Mail className="w-4 h-4" />
-                <span>support@leadbridge.com</span>
+                <span>hello@thesocialcircle.in</span>
               </li>
               <li className="flex items-center gap-2 opacity-90">
                 <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+91 98765 43210</span>
               </li>
               <li className="flex items-center gap-2 opacity-90">
                 <MapPin className="w-4 h-4" />
-                <span>New York, NY 10001</span>
+                <span>Delhi NCR, India</span>
               </li>
             </ul>
           </div>
@@ -90,7 +95,7 @@ function Footer() {
         <div className="border-t border-white/20 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm opacity-90">
-              © 2025 LeadBridge. All rights reserved.
+              © 2025 The Social Circle. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm opacity-90">
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">
@@ -99,8 +104,8 @@ function Footer() {
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">
                 LinkedIn
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">
-                Facebook
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">
+                Instagram
               </a>
             </div>
           </div>
