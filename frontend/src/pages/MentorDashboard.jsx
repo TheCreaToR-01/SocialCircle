@@ -8,7 +8,7 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Calendar, DollarSign, TrendingUp, Users, Plus, Edit, Trash2, ShoppingCart, Eye, EyeOff } from 'lucide-react';
+import { Calendar, DollarSign, TrendingUp, Users, Plus, Edit, Trash2, ShoppingCart, Eye, EyeOff, Send, CheckCircle, Ticket } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
