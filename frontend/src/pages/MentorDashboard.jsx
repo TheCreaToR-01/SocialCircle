@@ -804,10 +804,100 @@ function MentorDashboard() {
                     </div>
                   ))}
                 </div>
-              )}}
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="invitations">
+            <div className="bg-white border border-border shadow-sm rounded-xl p-8">
+              <h2 className="text-2xl font-heading font-bold mb-6">Sent Invitations</h2>
+              
+              {invitations.length === 0 ? (
+                <div className="text-center py-12 bg-muted rounded-xl">
+                  <p className="text-muted-foreground">No invitations sent yet.</p>
+                  <p className="text-sm text-muted-foreground mt-2">Purchase leads and invite guests to see them here.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {invitations.map((invitation) => (
+                    <div
+                      key={invitation.invitation_id}
+                      className="border border-border rounded-lg p-6"
+                      data-testid={`invitation-${invitation.invitation_id}`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-heading font-bold mb-2">{invitation.event_title}</h3>
+                          <div className="space-y-1 text-sm">
+                            <p><strong>Guest:</strong> {invitation.guest_name}</p>
+                            <p><strong>Email:</strong> {invitation.guest_email}</p>
+                            <p><strong>Ticket Price:</strong> ₹{invitation.ticket_price}</p>
+                            <p><strong>Invited:</strong> {new Date(invitation.invited_at).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              invitation.status === 'PAID'
+                                ? 'bg-green-100 text-green-800'
+                                : invitation.status === 'CANCELLED'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
+                            {invitation.status === 'PAID' ? '✓ Ticket Paid' : 
+                             invitation.status === 'CANCELLED' ? 'Cancelled' : 'Awaiting Payment'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Invite Guest Dialog */}
+        <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Invite Guest to Event</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedLead && (
+                <>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="font-medium">{selectedLead.name}</p>
+                    <p className="text-sm text-muted-foreground">{selectedLead.email}</p>
+                    <p className="text-sm text-muted-foreground mt-2">Event: {selectedLead.event_title}</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="ticket_price">Ticket Price (₹)</Label>
+                    <Input
+                      id="ticket_price"
+                      type="number"
+                      value={ticketPrice}
+                      onChange={(e) => setTicketPrice(e.target.value)}
+                      placeholder="Enter ticket price"
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      The guest will receive an email to pay this amount for their ticket.
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handleInviteGuest} 
+                    className="w-full rounded-full bg-purple-600 hover:bg-purple-700"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Invitation
+                  </Button>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
