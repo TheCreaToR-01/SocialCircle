@@ -210,8 +210,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Host invite guest endpoint"
-    - "Guest ticket payment flow"
     - "Host Dashboard - Invite Guest UI"
     - "Guest Dashboard - Invitations & Tickets UI"
   stuck_tasks: []
