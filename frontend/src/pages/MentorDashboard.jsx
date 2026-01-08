@@ -746,7 +746,7 @@ function MentorDashboard() {
                         <div className="flex-1">
                           <h3 className="text-lg font-heading font-bold mb-2">{lead.event_title}</h3>
                           <div className="space-y-1 text-sm">
-                            {lead.status === 'PURCHASED' ? (
+                            {['PURCHASED', 'INVITED', 'CONFIRMED'].includes(lead.status) ? (
                               <>
                                 <p><strong>Name:</strong> {lead.name}</p>
                                 <p><strong>Email:</strong> {lead.email}</p>
@@ -764,12 +764,18 @@ function MentorDashboard() {
                         <div className="flex flex-col items-end gap-2">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              lead.status === 'PURCHASED'
+                              lead.status === 'CONFIRMED'
                                 ? 'bg-green-100 text-green-800'
+                                : lead.status === 'INVITED'
+                                ? 'bg-purple-100 text-purple-800'
+                                : lead.status === 'PURCHASED'
+                                ? 'bg-amber-100 text-amber-800'
                                 : 'bg-blue-100 text-blue-800'
                             }`}
                           >
-                            {lead.status === 'PURCHASED' ? 'Purchased' : 'Verified'}
+                            {lead.status === 'CONFIRMED' ? '✓ Ticket Paid' : 
+                             lead.status === 'INVITED' ? 'Invited' :
+                             lead.status === 'PURCHASED' ? 'Purchased' : 'Verified'}
                           </span>
                           {lead.status === 'VERIFIED' && (
                             <Button
@@ -782,12 +788,23 @@ function MentorDashboard() {
                               Purchase (₹{lead.price_per_lead})
                             </Button>
                           )}
+                          {lead.status === 'PURCHASED' && (
+                            <Button
+                              size="sm"
+                              onClick={() => openInviteDialog(lead)}
+                              className="rounded-full bg-purple-600 hover:bg-purple-700"
+                              data-testid={`invite-lead-${lead.lead_id}`}
+                            >
+                              <Send className="w-4 h-4 mr-2" />
+                              Invite to Event
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
+              )}}
             </div>
           </TabsContent>
         </Tabs>
