@@ -334,50 +334,76 @@ function MentorDashboard() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white border border-border shadow-sm rounded-xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-primary" />
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <div className="bg-white border border-border shadow-sm rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-muted-foreground text-sm">Total Events</p>
-                <p className="text-2xl font-heading font-bold">{events.length}</p>
+                <p className="text-muted-foreground text-xs">Events</p>
+                <p className="text-xl font-heading font-bold">{events.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white border border-border shadow-sm rounded-xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center">
-                <Users className="w-6 h-6 text-accent-foreground" />
+          <div className="bg-white border border-border shadow-sm rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <Users className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-muted-foreground text-sm">Verified Leads</p>
-                <p className="text-2xl font-heading font-bold">{verifiedLeads.length}</p>
+                <p className="text-muted-foreground text-xs">Verified</p>
+                <p className="text-xl font-heading font-bold">{verifiedLeads.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white border border-border shadow-sm rounded-xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+          <div className="bg-white border border-border shadow-sm rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <ShoppingCart className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-muted-foreground text-sm">Purchased Leads</p>
-                <p className="text-2xl font-heading font-bold">{purchasedLeads.length}</p>
+                <p className="text-muted-foreground text-xs">Purchased</p>
+                <p className="text-xl font-heading font-bold">{purchasedLeads.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white border border-border shadow-sm rounded-xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-primary" />
+          <div className="bg-white border border-border shadow-sm rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                <Send className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-muted-foreground text-sm">Total Spent</p>
+                <p className="text-muted-foreground text-xs">Invited</p>
+                <p className="text-xl font-heading font-bold">{invitedLeads.length}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white border border-border shadow-sm rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <Ticket className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-muted-foreground text-xs">Confirmed</p>
+                <p className="text-xl font-heading font-bold">{confirmedLeads.length}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Total Spent Card */}
+        <div className="bg-white border border-border shadow-sm rounded-xl p-4 mb-8 max-w-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">Total Spent</p>
                 <p className="text-2xl font-heading font-bold">₹{totalRevenue}</p>
               </div>
             </div>
