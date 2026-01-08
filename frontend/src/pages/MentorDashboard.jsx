@@ -264,6 +264,34 @@ function MentorDashboard() {
     }
   };
 
+  const handleInviteGuest = async () => {
+    if (!selectedLead || !ticketPrice) {
+      toast.error('Please enter a ticket price');
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${BACKEND_URL}/api/mentor/leads/${selectedLead.lead_id}/invite`,
+        { ticket_price: parseFloat(ticketPrice) },
+        { withCredentials: true }
+      );
+      toast.success('Guest invited successfully! They will receive an email to pay for their ticket.');
+      setShowInviteDialog(false);
+      setSelectedLead(null);
+      setTicketPrice('');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to invite guest');
+    }
+  };
+
+  const openInviteDialog = (lead) => {
+    setSelectedLead(lead);
+    setTicketPrice(lead.price_per_lead?.toString() || '2000');
+    setShowInviteDialog(true);
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -274,6 +302,8 @@ function MentorDashboard() {
 
   const verifiedLeads = leads.filter(l => l.status === 'VERIFIED');
   const purchasedLeads = leads.filter(l => l.status === 'PURCHASED');
+  const invitedLeads = leads.filter(l => l.status === 'INVITED');
+  const confirmedLeads = leads.filter(l => l.status === 'CONFIRMED');
   const totalRevenue = purchasedLeads.reduce((sum, lead) => sum + (lead.price_per_lead || 0), 0);
 
   return (
