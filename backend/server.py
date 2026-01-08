@@ -47,7 +47,14 @@ class LeadStatus(str, Enum):
     PENDING = "PENDING"
     VERIFIED = "VERIFIED"
     PURCHASED = "PURCHASED"
+    INVITED = "INVITED"
+    CONFIRMED = "CONFIRMED"
     REJECTED = "REJECTED"
+
+class InvitationStatus(str, Enum):
+    PENDING = "PENDING"
+    PAID = "PAID"
+    CANCELLED = "CANCELLED"
 
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
