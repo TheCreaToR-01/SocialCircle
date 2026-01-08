@@ -415,6 +415,7 @@ function MentorDashboard() {
             <TabsTrigger value="profile" data-testid="tab-profile">Profile</TabsTrigger>
             <TabsTrigger value="events" data-testid="tab-events">Events</TabsTrigger>
             <TabsTrigger value="leads" data-testid="tab-leads">Leads</TabsTrigger>
+            <TabsTrigger value="invitations" data-testid="tab-invitations">Invitations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
