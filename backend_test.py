@@ -27,6 +27,9 @@ class LeadBridgeAPITester:
         self.test_event_id = None
         self.test_lead_id = None
         self.test_mentor_id = None
+        self.test_invitation_id = None
+        self.test_ticket_id = None
+        self.test_payment_id = None
         
         # Test results
         self.tests_run = 0
