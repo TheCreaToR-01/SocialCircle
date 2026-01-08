@@ -404,8 +404,7 @@ function MentorDashboard() {
             </div>
             <div>
               <p className="text-muted-foreground text-xs">Total Spent</p>
-                <p className="text-2xl font-heading font-bold">₹{totalRevenue}</p>
-              </div>
+              <p className="text-xl font-heading font-bold">₹{totalRevenue}</p>
             </div>
           </div>
         </div>
