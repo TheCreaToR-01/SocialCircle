@@ -664,7 +664,7 @@ class LeadBridgeAPITester:
 
     def run_all_tests(self):
         """Run all tests in sequence"""
-        print("🚀 Starting LeadBridge API Tests...")
+        print("🚀 Starting The Social Circle API Tests...")
         print(f"Testing against: {self.base_url}")
         
         # Run tests in logical order
@@ -678,6 +678,11 @@ class LeadBridgeAPITester:
         self.test_mentor_leads_endpoints()
         self.test_admin_endpoints()
         self.test_role_based_access_control()
+        
+        # NEW: Test guest selection and ticketing flow
+        self.test_guest_selection_ticketing_flow()
+        self.test_new_ticketing_endpoints()
+        
         self.test_logout()
         
         # Print summary
