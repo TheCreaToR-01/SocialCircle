@@ -10,10 +10,10 @@ class LeadBridgeAPITester:
         self.session = requests.Session()
         self.session.headers.update({'Content-Type': 'application/json'})
         
-        # Test credentials
-        self.admin_creds = {"email": "admin@leadbridge.com", "password": "admin123"}
-        self.mentor_creds = {"email": "mentor@leadbridge.com", "password": "mentor123"}
-        self.user_creds = {"email": "user@leadbridge.com", "password": "user123"}
+        # Test credentials from review request
+        self.admin_creds = {"email": "admin@thesocialcircle.in", "password": "admin123"}
+        self.mentor_creds = {"email": "chef.rajiv@thesocialcircle.in", "password": "host123"}
+        self.user_creds = {"email": "amit.tech@gmail.com", "password": "guest123"}
         
         # Store tokens and user data
         self.admin_token = None
