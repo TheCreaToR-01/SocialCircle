@@ -399,6 +399,269 @@ class LeadBridgeAPITester:
         else:
             self.log_test("User Logout", False, f"Status: {response.status_code}")
 
+    def test_guest_selection_ticketing_flow(self):
+        """Test the complete guest selection and ticketing flow"""
+        print("\n🔍 Testing Guest Selection & Ticketing Flow...")
+        
+        # Step 1: Guest applies to an event (existing functionality)
+        print("Step 1: Guest applies to event...")
+        success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        if not success:
+            self.log_test("Guest Selection Flow", False, "Failed to login as guest")
+            return
+        
+        # Get available events first
+        success, response = self.make_request('GET', '/events')
+        if not success or not response.json():
+            self.log_test("Guest Selection Flow", False, "No events available")
+            return
+        
+        events = response.json()
+        target_event = None
+        for event in events:
+            if "Farm-to-Table" in event.get("title", "") or "Dinner" in event.get("title", ""):
+                target_event = event
+                break
+        
+        if not target_event:
+            target_event = events[0]  # Use first available event
+        
+        self.test_event_id = target_event["event_id"]
+        
+        # Apply to event
+        booking_data = {
+            "name": "Amit Kumar",
+            "email": "amit.tech@gmail.com",
+            "phone": "9876543210",
+            "message": "Excited to attend this event!"
+        }
+        
+        success, response = self.make_request('POST', f'/events/{self.test_event_id}/book', booking_data)
+        if success:
+            result = response.json()
+            self.test_lead_id = result.get('lead_id')
+            self.log_test("Guest Application", True)
+        else:
+            self.log_test("Guest Application", False, f"Status: {response.status_code}")
+            return
+        
+        # Verify application in user bookings
+        success, response = self.make_request('GET', '/user/bookings')
+        if success:
+            bookings = response.json()
+            found_booking = any(b.get('lead_id') == self.test_lead_id for b in bookings)
+            self.log_test("Verify Application in User Bookings", found_booking)
+        else:
+            self.log_test("Verify Application in User Bookings", False, f"Status: {response.status_code}")
+        
+        # Step 2: Admin verifies the lead
+        print("Step 2: Admin verifies lead...")
+        success, response = self.make_request('POST', '/auth/login', self.admin_creds, expected_status=200)
+        if not success:
+            self.log_test("Admin Verification", False, "Failed to login as admin")
+            return
+        
+        # Get all leads
+        success, response = self.make_request('GET', '/admin/leads')
+        if success:
+            self.log_test("Get All Leads", True)
+            
+            # Verify the specific lead
+            verify_data = {"status": "VERIFIED"}
+            success, response = self.make_request('PUT', f'/admin/leads/{self.test_lead_id}/verify', verify_data)
+            if success:
+                self.log_test("Admin Lead Verification", True)
+            else:
+                self.log_test("Admin Lead Verification", False, f"Status: {response.status_code}")
+        else:
+            self.log_test("Get All Leads", False, f"Status: {response.status_code}")
+            return
+        
+        # Step 3: Host purchases the lead
+        print("Step 3: Host purchases lead...")
+        success, response = self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
+        if not success:
+            self.log_test("Host Purchase", False, "Failed to login as host")
+            return
+        
+        # Get mentor leads
+        success, response = self.make_request('GET', '/mentor/leads')
+        if success:
+            leads = response.json()
+            verified_lead = None
+            for lead in leads:
+                if lead.get('lead_id') == self.test_lead_id and lead.get('status') == 'VERIFIED':
+                    verified_lead = lead
+                    break
+            
+            if verified_lead:
+                self.log_test("Get Verified Leads", True)
+                
+                # Purchase the lead
+                success, response = self.make_request('POST', f'/mentor/leads/{self.test_lead_id}/purchase')
+                if success:
+                    purchase_result = response.json()
+                    demo_payment_code = purchase_result.get('demo_payment_code')
+                    self.test_payment_id = purchase_result.get('payment_id')
+                    self.log_test("Host Purchase Lead", True)
+                    
+                    # Complete demo payment
+                    payment_verify_data = {
+                        "demo_payment_code": demo_payment_code,
+                        "payment_id": self.test_payment_id
+                    }
+                    success, response = self.make_request('POST', '/mentor/payment-verify', payment_verify_data)
+                    if success:
+                        self.log_test("Host Payment Verification", True)
+                    else:
+                        self.log_test("Host Payment Verification", False, f"Status: {response.status_code}")
+                        return
+                else:
+                    self.log_test("Host Purchase Lead", False, f"Status: {response.status_code}")
+                    return
+            else:
+                self.log_test("Get Verified Leads", False, "No verified lead found")
+                return
+        else:
+            self.log_test("Get Mentor Leads", False, f"Status: {response.status_code}")
+            return
+        
+        # Step 4: Host invites guest (NEW FUNCTIONALITY)
+        print("Step 4: Host invites guest...")
+        invite_data = {"ticket_price": 3500}
+        success, response = self.make_request('POST', f'/mentor/leads/{self.test_lead_id}/invite', invite_data)
+        if success:
+            invite_result = response.json()
+            self.test_invitation_id = invite_result.get('invitation_id')
+            self.log_test("Host Invite Guest", True)
+            
+            # Verify invitation in host's invitations
+            success, response = self.make_request('GET', '/mentor/invitations')
+            if success:
+                invitations = response.json()
+                found_invitation = any(inv.get('invitation_id') == self.test_invitation_id for inv in invitations)
+                self.log_test("Verify Invitation in Host Dashboard", found_invitation)
+            else:
+                self.log_test("Verify Invitation in Host Dashboard", False, f"Status: {response.status_code}")
+        else:
+            self.log_test("Host Invite Guest", False, f"Status: {response.status_code}")
+            return
+        
+        # Step 5: Guest receives invitation (NEW FUNCTIONALITY)
+        print("Step 5: Guest receives invitation...")
+        success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        if not success:
+            self.log_test("Guest Invitation Check", False, "Failed to login as guest")
+            return
+        
+        success, response = self.make_request('GET', '/user/invitations')
+        if success:
+            invitations = response.json()
+            pending_invitation = None
+            for inv in invitations:
+                if inv.get('invitation_id') == self.test_invitation_id and inv.get('status') == 'PENDING':
+                    pending_invitation = inv
+                    break
+            
+            if pending_invitation:
+                self.log_test("Guest Receives Invitation", True)
+                
+                # Verify invitation details
+                if pending_invitation.get('ticket_price') == 3500:
+                    self.log_test("Invitation Ticket Price Correct", True)
+                else:
+                    self.log_test("Invitation Ticket Price Correct", False, f"Expected 3500, got {pending_invitation.get('ticket_price')}")
+            else:
+                self.log_test("Guest Receives Invitation", False, "No pending invitation found")
+                return
+        else:
+            self.log_test("Guest Receives Invitation", False, f"Status: {response.status_code}")
+            return
+        
+        # Step 6: Guest pays for ticket (NEW FUNCTIONALITY)
+        print("Step 6: Guest pays for ticket...")
+        success, response = self.make_request('POST', f'/user/invitations/{self.test_invitation_id}/pay')
+        if success:
+            payment_result = response.json()
+            ticket_demo_code = payment_result.get('demo_payment_code')
+            ticket_payment_id = payment_result.get('payment_id')
+            self.log_test("Guest Initiate Ticket Payment", True)
+            
+            # Complete ticket payment
+            ticket_payment_verify_data = {
+                "demo_payment_code": ticket_demo_code,
+                "payment_id": ticket_payment_id
+            }
+            success, response = self.make_request('POST', '/user/ticket-payment-verify', ticket_payment_verify_data)
+            if success:
+                ticket_result = response.json()
+                self.test_ticket_id = ticket_result.get('ticket_id')
+                self.log_test("Guest Ticket Payment Verification", True)
+                
+                # Verify ticket is created
+                success, response = self.make_request('GET', '/user/tickets')
+                if success:
+                    tickets = response.json()
+                    found_ticket = any(t.get('ticket_id') == self.test_ticket_id for t in tickets)
+                    if found_ticket:
+                        self.log_test("Verify Ticket Created", True)
+                        
+                        # Check ticket details
+                        ticket = next((t for t in tickets if t.get('ticket_id') == self.test_ticket_id), None)
+                        if ticket and ticket.get('status') == 'CONFIRMED':
+                            self.log_test("Ticket Status Confirmed", True)
+                        else:
+                            self.log_test("Ticket Status Confirmed", False, f"Status: {ticket.get('status') if ticket else 'Not found'}")
+                    else:
+                        self.log_test("Verify Ticket Created", False, "Ticket not found in user tickets")
+                else:
+                    self.log_test("Verify Ticket Created", False, f"Status: {response.status_code}")
+            else:
+                self.log_test("Guest Ticket Payment Verification", False, f"Status: {response.status_code}")
+        else:
+            self.log_test("Guest Initiate Ticket Payment", False, f"Status: {response.status_code}")
+        
+        print("✅ Guest Selection & Ticketing Flow Complete!")
+
+    def test_new_ticketing_endpoints(self):
+        """Test all new ticketing endpoints individually"""
+        print("\n🔍 Testing New Ticketing Endpoints...")
+        
+        # Test host invitations endpoint
+        success, response = self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
+        if success:
+            success, response = self.make_request('GET', '/mentor/invitations')
+            if success:
+                self.log_test("GET /mentor/invitations", True)
+            else:
+                self.log_test("GET /mentor/invitations", False, f"Status: {response.status_code}")
+        
+        # Test guest invitations endpoint
+        success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        if success:
+            success, response = self.make_request('GET', '/user/invitations')
+            if success:
+                self.log_test("GET /user/invitations", True)
+            else:
+                self.log_test("GET /user/invitations", False, f"Status: {response.status_code}")
+            
+            # Test guest tickets endpoint
+            success, response = self.make_request('GET', '/user/tickets')
+            if success:
+                self.log_test("GET /user/tickets", True)
+            else:
+                self.log_test("GET /user/tickets", False, f"Status: {response.status_code}")
+        
+        # Test unauthorized access
+        success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        if success:
+            # User trying to access host invitations
+            success, response = self.make_request('GET', '/mentor/invitations', expected_status=403)
+            if success:
+                self.log_test("RBAC - User blocked from host invitations", True)
+            else:
+                self.log_test("RBAC - User blocked from host invitations", False, f"Status: {response.status_code}")
+
     def run_all_tests(self):
         """Run all tests in sequence"""
         print("🚀 Starting LeadBridge API Tests...")
