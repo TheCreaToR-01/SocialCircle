@@ -18,8 +18,12 @@ function MentorDashboard() {
   const [profile, setProfile] = useState(null);
   const [events, setEvents] = useState([]);
   const [leads, setLeads] = useState([]);
+  const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [ticketPrice, setTicketPrice] = useState('');
   const [editingEvent, setEditingEvent] = useState(null);
   const [eventForm, setEventForm] = useState({
     title: '',
