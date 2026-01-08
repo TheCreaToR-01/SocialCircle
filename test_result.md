@@ -119,51 +119,63 @@ backend:
 
   - task: "Host invite guest endpoint"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "New endpoint /api/mentor/leads/{lead_id}/invite - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ WORKING - POST /api/mentor/leads/{lead_id}/invite successfully creates invitations with ticket_price. Tested complete flow: host purchases lead → invites guest → invitation created with status PENDING. Verified in /api/mentor/invitations endpoint."
 
   - task: "Guest invitations endpoint"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "New endpoint /api/user/invitations - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ WORKING - GET /api/user/invitations returns all invitations for guest with complete event details, host info, and correct ticket pricing. Invitation status correctly shows PENDING before payment."
 
   - task: "Guest ticket payment endpoint"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "New endpoints /api/user/invitations/{id}/pay and /api/user/ticket-payment-verify"
+      - working: true
+        agent: "testing"
+        comment: "✅ WORKING - Both endpoints function correctly. POST /api/user/invitations/{id}/pay initiates payment with demo code. POST /api/user/ticket-payment-verify completes payment, updates invitation status to PAID, creates ticket record, and updates lead status to CONFIRMED."
 
   - task: "Guest tickets endpoint"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "New endpoint /api/user/tickets - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ WORKING - GET /api/user/tickets returns all confirmed tickets with complete event details, host information, ticket price, and CONFIRMED status. Ticket creation works correctly after payment verification."
 
 frontend:
   - task: "Host Dashboard - Invite Guest UI"
