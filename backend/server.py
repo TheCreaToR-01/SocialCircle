@@ -165,6 +165,22 @@ class VerifyMentorRequest(BaseModel):
     status: str
     reason: Optional[str] = None
 
+class Invitation(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    invitation_id: str
+    lead_id: str
+    event_id: str
+    host_id: str
+    guest_id: str
+    ticket_price: float
+    status: str = "PENDING"
+    invited_at: datetime
+    paid_at: Optional[datetime] = None
+    payment_id: Optional[str] = None
+
+class InviteGuestRequest(BaseModel):
+    ticket_price: float
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
