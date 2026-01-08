@@ -1109,6 +1109,321 @@ async def verify_payment(request: Request, user: User = Depends(get_current_user
     # lead = await db.leads.find_one({"lead_id": payment["lead_id"]}, {"_id": 0})
     # return {"message": "Payment verified", "lead": lead}
 
+# ==================== GUEST INVITATION & TICKETING ENDPOINTS ====================
+
+@api_router.post("/mentor/leads/{lead_id}/invite")
+async def invite_guest(lead_id: str, data: InviteGuestRequest, user: User = Depends(get_current_user)):
+    """Host invites a guest from purchased leads"""
+    await require_role(user, [Role.MENTOR])
+    
+    lead = await db.leads.find_one({"lead_id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    if lead.get("status") != "PURCHASED":
+        raise HTTPException(status_code=400, detail="Lead must be purchased before inviting")
+    
+    # Check if already invited
+    existing_invitation = await db.invitations.find_one({"lead_id": lead_id})
+    if existing_invitation:
+        raise HTTPException(status_code=400, detail="Guest already invited for this lead")
+    
+    mentor = await db.mentors.find_one({"user_id": user.user_id}, {"_id": 0})
+    event = await db.events.find_one({"event_id": lead["event_id"]}, {"_id": 0})
+    
+    if not mentor or event.get("mentor_id") != mentor.get("mentor_id"):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    invitation_id = f"inv_{uuid.uuid4().hex[:12]}"
+    invitation_doc = {
+        "invitation_id": invitation_id,
+        "lead_id": lead_id,
+        "event_id": lead["event_id"],
+        "host_id": mentor["mentor_id"],
+        "guest_id": lead["user_id"],
+        "ticket_price": data.ticket_price,
+        "status": "PENDING",
+        "invited_at": datetime.now(timezone.utc)
+    }
+    await db.invitations.insert_one(invitation_doc)
+    
+    # Update lead status to INVITED
+    await db.leads.update_one(
+        {"lead_id": lead_id},
+        {"$set": {"status": "INVITED", "invitation_id": invitation_id}}
+    )
+    
+    # Send invitation email to guest
+    guest_user = await db.users.find_one({"user_id": lead["user_id"]}, {"_id": 0})
+    if guest_user:
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+                <tr>
+                    <td align="center">
+                        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px;">
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #0A1628 0%, #243B53 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
+                                    <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎉 You're Invited!</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 40px;">
+                                    <h2 style="color: #0A1628; margin-top: 0;">Hi {guest_user.get("name", "Guest")}!</h2>
+                                    <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                        Great news! You've been selected to attend:
+                                    </p>
+                                    <table width="100%" style="background-color: #F3F4F6; border-radius: 6px; padding: 20px; margin: 20px 0;">
+                                        <tr>
+                                            <td>
+                                                <p style="margin: 0; color: #0A1628; font-size: 18px; font-weight: bold;">{event.get("title", "Event")}</p>
+                                                <p style="margin: 10px 0 0 0; color: #6B7280;">Ticket Price: <strong>₹{data.ticket_price}</strong></p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                        Visit your dashboard to pay for your ticket and confirm your spot!
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="background-color: #F3F4F6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+                                    <p style="color: #6B7280; font-size: 12px; margin: 0;">© 2025 The Social Circle</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+        await send_email_async(guest_user["email"], f"You're Invited to {event.get('title', 'an Event')}!", html_content)
+    
+    return {"invitation_id": invitation_id, "message": "Guest invited successfully"}
+
+@api_router.get("/user/invitations")
+async def get_user_invitations(user: User = Depends(get_current_user)):
+    """Get all invitations for the current user"""
+    await require_role(user, [Role.USER])
+    
+    invitations = await db.invitations.find({"guest_id": user.user_id}, {"_id": 0}).to_list(1000)
+    
+    for invitation in invitations:
+        event = await db.events.find_one({"event_id": invitation["event_id"]}, {"_id": 0})
+        if event:
+            invitation["event_title"] = event.get("title", "Unknown Event")
+            invitation["event_datetime"] = event.get("event_datetime")
+            invitation["event_description"] = event.get("description", "")
+            invitation["event_duration"] = event.get("duration", 0)
+            
+            mentor = await db.mentors.find_one({"mentor_id": event["mentor_id"]}, {"_id": 0})
+            if mentor:
+                host_user = await db.users.find_one({"user_id": mentor["user_id"]}, {"_id": 0})
+                invitation["host_name"] = host_user.get("name", "Unknown") if host_user else "Unknown"
+    
+    return invitations
+
+@api_router.post("/user/invitations/{invitation_id}/pay")
+async def pay_for_ticket(invitation_id: str, user: User = Depends(get_current_user)):
+    """Guest initiates ticket payment"""
+    await require_role(user, [Role.USER])
+    
+    invitation = await db.invitations.find_one({"invitation_id": invitation_id}, {"_id": 0})
+    if not invitation:
+        raise HTTPException(status_code=404, detail="Invitation not found")
+    
+    if invitation.get("guest_id") != user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if invitation.get("status") == "PAID":
+        raise HTTPException(status_code=400, detail="Ticket already paid")
+    
+    if invitation.get("status") == "CANCELLED":
+        raise HTTPException(status_code=400, detail="Invitation has been cancelled")
+    
+    # DEMO PAYMENT for ticket
+    payment_id = f"ticket_pay_{uuid.uuid4().hex[:12]}"
+    demo_payment_code = f"TICKET{uuid.uuid4().hex[:6].upper()}"
+    
+    ticket_payment_doc = {
+        "payment_id": payment_id,
+        "invitation_id": invitation_id,
+        "guest_id": user.user_id,
+        "demo_payment_code": demo_payment_code,
+        "amount": invitation.get("ticket_price", 0),
+        "status": "PENDING",
+        "type": "TICKET",
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.ticket_payments.insert_one(ticket_payment_doc)
+    
+    return {
+        "payment_id": payment_id,
+        "demo_payment_code": demo_payment_code,
+        "amount": invitation.get("ticket_price", 0),
+        "message": "Use this demo code to complete ticket payment"
+    }
+
+@api_router.post("/user/ticket-payment-verify")
+async def verify_ticket_payment(request: Request, user: User = Depends(get_current_user)):
+    """Guest verifies ticket payment"""
+    await require_role(user, [Role.USER])
+    
+    body = await request.json()
+    demo_payment_code = body.get("demo_payment_code")
+    payment_id = body.get("payment_id")
+    
+    if not demo_payment_code or not payment_id:
+        raise HTTPException(status_code=400, detail="Missing payment details")
+    
+    payment = await db.ticket_payments.find_one({"payment_id": payment_id}, {"_id": 0})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    if payment.get("guest_id") != user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    if payment.get("demo_payment_code") != demo_payment_code:
+        raise HTTPException(status_code=400, detail="Invalid payment code")
+    
+    # Update payment status
+    await db.ticket_payments.update_one(
+        {"payment_id": payment_id},
+        {"$set": {"status": "COMPLETED", "completed_at": datetime.now(timezone.utc)}}
+    )
+    
+    # Update invitation status
+    invitation_id = payment.get("invitation_id")
+    await db.invitations.update_one(
+        {"invitation_id": invitation_id},
+        {"$set": {"status": "PAID", "paid_at": datetime.now(timezone.utc), "payment_id": payment_id}}
+    )
+    
+    # Update lead status to CONFIRMED
+    invitation = await db.invitations.find_one({"invitation_id": invitation_id}, {"_id": 0})
+    if invitation:
+        await db.leads.update_one(
+            {"lead_id": invitation.get("lead_id")},
+            {"$set": {"status": "CONFIRMED"}}
+        )
+    
+    # Create ticket record
+    ticket_id = f"ticket_{uuid.uuid4().hex[:12]}"
+    event = await db.events.find_one({"event_id": invitation.get("event_id")}, {"_id": 0})
+    
+    ticket_doc = {
+        "ticket_id": ticket_id,
+        "invitation_id": invitation_id,
+        "event_id": invitation.get("event_id"),
+        "guest_id": user.user_id,
+        "ticket_price": payment.get("amount"),
+        "payment_id": payment_id,
+        "status": "CONFIRMED",
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.tickets.insert_one(ticket_doc)
+    
+    # Send confirmation email
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px;">
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #0A1628 0%, #243B53 100%); padding: 40px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎫 Ticket Confirmed!</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 40px;">
+                                <h2 style="color: #0A1628; margin-top: 0;">Hi {user.name}!</h2>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    Your ticket has been confirmed for:
+                                </p>
+                                <table width="100%" style="background-color: #F3F4F6; border-radius: 6px; padding: 20px; margin: 20px 0;">
+                                    <tr>
+                                        <td>
+                                            <p style="margin: 0; color: #0A1628; font-size: 18px; font-weight: bold;">{event.get("title", "Event")}</p>
+                                            <p style="margin: 10px 0 0 0; color: #6B7280;">Ticket ID: <strong>{ticket_id}</strong></p>
+                                            <p style="margin: 5px 0 0 0; color: #6B7280;">Amount Paid: <strong>₹{payment.get("amount")}</strong></p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                    See you at the event! 🎉
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #F3F4F6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+                                <p style="color: #6B7280; font-size: 12px; margin: 0;">© 2025 The Social Circle</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+    await send_email_async(user.email, f"Ticket Confirmed - {event.get('title', 'Event')}", html_content)
+    
+    return {"message": "Ticket payment verified successfully", "ticket_id": ticket_id}
+
+@api_router.get("/user/tickets")
+async def get_user_tickets(user: User = Depends(get_current_user)):
+    """Get all confirmed tickets for the current user"""
+    await require_role(user, [Role.USER])
+    
+    tickets = await db.tickets.find({"guest_id": user.user_id}, {"_id": 0}).to_list(1000)
+    
+    for ticket in tickets:
+        event = await db.events.find_one({"event_id": ticket["event_id"]}, {"_id": 0})
+        if event:
+            ticket["event_title"] = event.get("title", "Unknown Event")
+            ticket["event_datetime"] = event.get("event_datetime")
+            ticket["event_description"] = event.get("description", "")
+            ticket["event_duration"] = event.get("duration", 0)
+            ticket["event_category"] = event.get("category", "")
+            
+            mentor = await db.mentors.find_one({"mentor_id": event["mentor_id"]}, {"_id": 0})
+            if mentor:
+                host_user = await db.users.find_one({"user_id": mentor["user_id"]}, {"_id": 0})
+                ticket["host_name"] = host_user.get("name", "Unknown") if host_user else "Unknown"
+    
+    return tickets
+
+@api_router.get("/mentor/invitations")
+async def get_mentor_invitations(user: User = Depends(get_current_user)):
+    """Get all invitations sent by the host"""
+    await require_role(user, [Role.MENTOR])
+    
+    mentor = await db.mentors.find_one({"user_id": user.user_id}, {"_id": 0})
+    if not mentor:
+        raise HTTPException(status_code=404, detail="Mentor profile not found")
+    
+    invitations = await db.invitations.find({"host_id": mentor["mentor_id"]}, {"_id": 0}).to_list(1000)
+    
+    for invitation in invitations:
+        lead = await db.leads.find_one({"lead_id": invitation["lead_id"]}, {"_id": 0})
+        if lead:
+            invitation["guest_name"] = lead.get("name", "Unknown")
+            invitation["guest_email"] = lead.get("email", "")
+        
+        event = await db.events.find_one({"event_id": invitation["event_id"]}, {"_id": 0})
+        if event:
+            invitation["event_title"] = event.get("title", "Unknown Event")
+    
+    return invitations
+
+# ==================== END GUEST INVITATION & TICKETING ENDPOINTS ====================
+
 @api_router.get("/admin/users")
 async def get_all_users(user: User = Depends(get_current_user)):
     await require_role(user, [Role.ADMIN])
