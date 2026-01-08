@@ -68,15 +68,17 @@ function MentorDashboard() {
 
   const fetchData = async () => {
     try {
-      const [profileRes, eventsRes, leadsRes] = await Promise.all([
+      const [profileRes, eventsRes, leadsRes, invitationsRes] = await Promise.all([
         axios.get(`${BACKEND_URL}/api/mentor/profile`, { withCredentials: true }),
         axios.get(`${BACKEND_URL}/api/mentor/events`, { withCredentials: true }),
         axios.get(`${BACKEND_URL}/api/mentor/leads`, { withCredentials: true }),
+        axios.get(`${BACKEND_URL}/api/mentor/invitations`, { withCredentials: true }),
       ]);
       
       setProfile(profileRes.data);
       setEvents(eventsRes.data);
       setLeads(leadsRes.data);
+      setInvitations(invitationsRes.data);
       
       setProfileForm({
         bio: profileRes.data.bio || '',
