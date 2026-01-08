@@ -87,7 +87,7 @@ sudo supervisorctl restart backend
 
 ```bash
 # Test user registration
-curl -X POST "https://leadbridge-1.preview.emergentagent.com/api/auth/register" \
+curl -X POST "https://networkhub-11.preview.emergentagent.com/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "your-verified-email@example.com",
@@ -139,7 +139,7 @@ curl -X POST "https://leadbridge-1.preview.emergentagent.com/api/auth/register" 
 # 3. Mentor receives approval email
 
 # Or via API:
-curl -X PUT "https://leadbridge-1.preview.emergentagent.com/api/admin/mentors/{mentor_id}/verify" \
+curl -X PUT "https://networkhub-11.preview.emergentagent.com/api/admin/mentors/{mentor_id}/verify" \
   -H "Content-Type: application/json" \
   -H "Cookie: session_token=YOUR_ADMIN_TOKEN" \
   -d '{"status": "APPROVED"}'
@@ -189,7 +189,7 @@ All emails use beautiful HTML templates with:
 ```env
 RESEND_API_KEY=re_your_api_key_here
 SENDER_EMAIL=onboarding@resend.dev
-FRONTEND_URL=https://leadbridge-1.preview.emergentagent.com
+FRONTEND_URL=https://networkhub-11.preview.emergentagent.com
 ```
 
 **Important Notes:**

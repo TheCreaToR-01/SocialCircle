@@ -56,7 +56,7 @@ RAZORPAY_KEY_SECRET=""
 
 ### Frontend (.env)
 ```
-REACT_APP_BACKEND_URL=https://leadbridge-1.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://networkhub-11.preview.emergentagent.com
 WDS_SOCKET_PORT=443
 ENABLE_HEALTH_CHECK=false
 ```
@@ -228,9 +228,9 @@ ENABLE_HEALTH_CHECK=false
 
 ## 📞 Support & Resources
 
-- **Application URL:** https://leadbridge-1.preview.emergentagent.com
-- **Backend API:** https://leadbridge-1.preview.emergentagent.com/api
-- **Admin Dashboard:** https://leadbridge-1.preview.emergentagent.com/admin/dashboard
+- **Application URL:** https://networkhub-11.preview.emergentagent.com
+- **Backend API:** https://networkhub-11.preview.emergentagent.com/api
+- **Admin Dashboard:** https://networkhub-11.preview.emergentagent.com/admin/dashboard
 - **Documentation:** This file + inline code comments
 - **Test Report:** `/app/test_reports/iteration_1.json`
 - **Design Guidelines:** `/app/design_guidelines.json`
