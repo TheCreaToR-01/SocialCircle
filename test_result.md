@@ -101,3 +101,111 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Build The Social Circle platform - a curated networking platform connecting Hosts and Guests for micro-events. Implement guest selection and ticketing flow."
+
+backend:
+  - task: "Events API - Public access"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Events visible without login - verified via screenshot"
+
+  - task: "Host invite guest endpoint"
+    implemented: true
+    working: NA
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: NA
+        agent: "main"
+        comment: "New endpoint /api/mentor/leads/{lead_id}/invite - needs testing"
+
+  - task: "Guest invitations endpoint"
+    implemented: true
+    working: NA
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: NA
+        agent: "main"
+        comment: "New endpoint /api/user/invitations - needs testing"
+
+  - task: "Guest ticket payment endpoint"
+    implemented: true
+    working: NA
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: NA
+        agent: "main"
+        comment: "New endpoints /api/user/invitations/{id}/pay and /api/user/ticket-payment-verify"
+
+  - task: "Guest tickets endpoint"
+    implemented: true
+    working: NA
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: NA
+        agent: "main"
+        comment: "New endpoint /api/user/tickets - needs testing"
+
+frontend:
+  - task: "Host Dashboard - Invite Guest UI"
+    implemented: true
+    working: NA
+    file: "/app/frontend/src/pages/MentorDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: NA
+        agent: "main"
+        comment: "Added invite button for purchased leads, invite dialog, invitations tab"
+
+  - task: "Guest Dashboard - Invitations & Tickets UI"
+    implemented: true
+    working: NA
+    file: "/app/frontend/src/pages/UserDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: NA
+        agent: "main"
+        comment: "Added invitations tab, ticket payment flow, tickets tab"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Host invite guest endpoint"
+    - "Guest ticket payment flow"
+    - "Host Dashboard - Invite Guest UI"
+    - "Guest Dashboard - Invitations & Tickets UI"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented guest selection and ticketing flow. Test credentials - Admin: admin@thesocialcircle.in/admin123, Host: chef.rajiv@thesocialcircle.in/host123, Guest: amit.tech@gmail.com/guest123. Flow: 1) Guest applies to event, 2) Admin verifies, 3) Host purchases lead, 4) Host invites guest, 5) Guest pays for ticket. Demo payment codes are used."
