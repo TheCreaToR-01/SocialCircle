@@ -247,7 +247,7 @@ function UserDashboard() {
                 </div>
               ) : bookings.length === 0 ? (
                 <div className="text-center py-12 bg-muted rounded-xl">
-                  <p className="text-muted-foreground">You haven't applied to any events yet.</p>
+                  <p className="text-muted-foreground">You haven&apos;t applied to any events yet.</p>
                   <button
                     onClick={() => navigate('/')}
                     className="mt-4 text-primary font-medium hover:underline"
