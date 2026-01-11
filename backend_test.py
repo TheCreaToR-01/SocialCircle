@@ -494,23 +494,29 @@ class LeadBridgeAPITester:
         print("\n🔍 Testing Pass Lead Endpoint...")
         
         # First, we need to create a complete flow to get a purchased lead
-        # Step 1: Create a lead as guest
+        # Step 1: Login as mentor to get their events
+        success, response = self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
+        if not success:
+            self.log_test("Pass Lead Tests", False, "Failed to login as mentor")
+            return
+        
+        # Get mentor events
+        success, response = self.make_request('GET', '/mentor/events')
+        if not success or not response.json():
+            self.log_test("Pass Lead Tests", False, "No mentor events available")
+            return
+        
+        mentor_events = response.json()
+        test_event = mentor_events[0]
+        test_event_id = test_event["event_id"]
+        
+        # Step 2: Create a lead as guest
         success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
         if not success:
             self.log_test("Pass Lead Tests", False, "Failed to login as guest")
             return
         
-        # Get an event to apply to
-        success, response = self.make_request('GET', '/events')
-        if not success or not response.json():
-            self.log_test("Pass Lead Tests", False, "No events available")
-            return
-        
-        events = response.json()
-        test_event = events[0]
-        test_event_id = test_event["event_id"]
-        
-        # Apply to event
+        # Apply to mentor's event
         timestamp = datetime.now().strftime('%H%M%S')
         booking_data = {
             "name": f"Pass Test User {timestamp}",
@@ -527,7 +533,7 @@ class LeadBridgeAPITester:
         result = response.json()
         pass_test_lead_id = result.get('lead_id')
         
-        # Step 2: Admin verifies the lead
+        # Step 3: Admin verifies the lead
         success, response = self.make_request('POST', '/auth/login', self.admin_creds, expected_status=200)
         if not success:
             self.log_test("Pass Lead Tests", False, "Failed to login as admin")
@@ -539,7 +545,7 @@ class LeadBridgeAPITester:
             self.log_test("Pass Lead Tests", False, "Failed to verify lead")
             return
         
-        # Step 3: Host purchases the lead
+        # Step 4: Host purchases the lead
         success, response = self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
         if not success:
             self.log_test("Pass Lead Tests", False, "Failed to login as host")
@@ -564,27 +570,31 @@ class LeadBridgeAPITester:
             self.log_test("Pass Lead Tests", False, "Failed to complete payment")
             return
         
-        # Step 4: Now test the PASS endpoint
+        # Step 5: Now test the PASS endpoint
         success, response = self.make_request('POST', f'/mentor/leads/{pass_test_lead_id}/pass')
         if success:
             self.log_test("Pass Lead Endpoint", True)
             
-            # Verify lead status changed to PASSED
-            success, response = self.make_request('GET', '/mentor/leads')
+            # Verify lead status changed to PASSED via admin endpoint
+            success, response = self.make_request('POST', '/auth/login', self.admin_creds, expected_status=200)
             if success:
-                leads = response.json()
-                passed_lead = None
-                for lead in leads:
-                    if lead.get('lead_id') == pass_test_lead_id:
-                        passed_lead = lead
-                        break
-                
-                if passed_lead and passed_lead.get('status') == 'PASSED':
-                    self.log_test("Lead Status Changed to PASSED", True)
+                success, response = self.make_request('GET', '/admin/leads')
+                if success:
+                    all_leads = response.json()
+                    passed_lead = None
+                    for lead in all_leads:
+                        if lead.get('lead_id') == pass_test_lead_id:
+                            passed_lead = lead
+                            break
+                    
+                    if passed_lead and passed_lead.get('status') == 'PASSED':
+                        self.log_test("Lead Status Changed to PASSED", True)
+                    else:
+                        self.log_test("Lead Status Changed to PASSED", False, f"Status: {passed_lead.get('status') if passed_lead else 'Lead not found'}")
                 else:
-                    self.log_test("Lead Status Changed to PASSED", False, f"Status: {passed_lead.get('status') if passed_lead else 'Lead not found'}")
+                    self.log_test("Lead Status Changed to PASSED", False, f"Failed to get all leads: {response.status_code}")
             else:
-                self.log_test("Lead Status Changed to PASSED", False, f"Failed to get leads: {response.status_code}")
+                self.log_test("Lead Status Changed to PASSED", False, "Failed to login as admin for verification")
         else:
             self.log_test("Pass Lead Endpoint", False, f"Status: {response.status_code}")
         
