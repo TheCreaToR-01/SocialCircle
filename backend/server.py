@@ -1205,6 +1205,135 @@ async def invite_guest(lead_id: str, data: InviteGuestRequest, user: User = Depe
     
     return {"invitation_id": invitation_id, "message": "Guest invited successfully"}
 
+@api_router.post("/mentor/leads/{lead_id}/pass")
+async def pass_guest(lead_id: str, user: User = Depends(get_current_user)):
+    """Host passes/rejects a guest from purchased leads"""
+    await require_role(user, [Role.MENTOR])
+    
+    lead = await db.leads.find_one({"lead_id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    if lead.get("status") != "PURCHASED":
+        raise HTTPException(status_code=400, detail="Lead must be purchased before passing")
+    
+    mentor = await db.mentors.find_one({"user_id": user.user_id}, {"_id": 0})
+    event = await db.events.find_one({"event_id": lead["event_id"]}, {"_id": 0})
+    
+    if not mentor or event.get("mentor_id") != mentor.get("mentor_id"):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Update lead status to PASSED
+    await db.leads.update_one(
+        {"lead_id": lead_id},
+        {"$set": {"status": "PASSED", "passed_at": datetime.now(timezone.utc)}}
+    )
+    
+    # Send rejection email to guest
+    guest_user = await db.users.find_one({"user_id": lead["user_id"]}, {"_id": 0})
+    if guest_user:
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Nunito', Arial, sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+                <tr>
+                    <td align="center">
+                        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden;">
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #0A1628 0%, #243B53 100%); padding: 40px; text-align: center;">
+                                    <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Update on Your Application</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 40px;">
+                                    <h2 style="color: #0A1628; margin-top: 0;">Hi {guest_user.get("name", "Guest")}!</h2>
+                                    <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                        Thank you for your interest in attending:
+                                    </p>
+                                    <table width="100%" style="background-color: #FEF2F2; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                                        <tr>
+                                            <td>
+                                                <p style="margin: 0; color: #0A1628; font-size: 18px; font-weight: bold;">{event.get("title", "Event")}</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                        Unfortunately, the host has decided to go with other guests for this particular event. 
+                                        Don't be discouraged - there are many more amazing experiences waiting for you!
+                                    </p>
+                                    <p style="color: #374151; font-size: 16px; line-height: 1.6;">
+                                        🎉 <strong>Keep exploring!</strong> Check out other upcoming events on The Social Circle and apply to ones that match your interests.
+                                    </p>
+                                    <table width="100%" style="margin: 30px 0;">
+                                        <tr>
+                                            <td align="center">
+                                                <a href="{FRONTEND_URL}/events" style="display: inline-block; background: linear-gradient(135deg, #FF6B6B 0%, #FA5252 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px;">Browse More Events</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="background-color: #F8FAFC; padding: 20px; text-align: center;">
+                                    <p style="color: #6B7280; font-size: 12px; margin: 0;">© 2025 The Social Circle - Where strangers become friends</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+        await send_email_async(guest_user["email"], f"Update on your application for {event.get('title', 'Event')}", html_content)
+    
+    return {"message": "Guest passed successfully"}
+
+@api_router.get("/mentor/leads/projected-revenue")
+async def get_projected_revenue(user: User = Depends(get_current_user)):
+    """Get projected revenue from verified leads for host"""
+    await require_role(user, [Role.MENTOR])
+    
+    mentor = await db.mentors.find_one({"user_id": user.user_id}, {"_id": 0})
+    if not mentor:
+        raise HTTPException(status_code=404, detail="Mentor profile not found")
+    
+    # Get all events by this mentor
+    events = await db.events.find({"mentor_id": mentor["mentor_id"]}, {"_id": 0}).to_list(1000)
+    event_ids = [e["event_id"] for e in events]
+    
+    # Get all verified leads for these events
+    verified_leads = await db.leads.find({
+        "event_id": {"$in": event_ids},
+        "status": "VERIFIED"
+    }, {"_id": 0}).to_list(1000)
+    
+    # Calculate projected revenue
+    projected_data = []
+    for event in events:
+        event_leads = [l for l in verified_leads if l["event_id"] == event["event_id"]]
+        lead_count = len(event_leads)
+        potential_revenue = lead_count * event.get("price_per_lead", 0)
+        
+        if lead_count > 0:
+            projected_data.append({
+                "event_id": event["event_id"],
+                "event_title": event.get("title", "Unknown"),
+                "lead_count": lead_count,
+                "price_per_lead": event.get("price_per_lead", 0),
+                "potential_revenue": potential_revenue
+            })
+    
+    total_leads = sum(p["lead_count"] for p in projected_data)
+    total_potential_revenue = sum(p["potential_revenue"] for p in projected_data)
+    
+    return {
+        "projected_data": projected_data,
+        "total_leads": total_leads,
+        "total_potential_revenue": total_potential_revenue
+    }
+
 @api_router.get("/user/invitations")
 async def get_user_invitations(user: User = Depends(get_current_user)):
     """Get all invitations for the current user"""
