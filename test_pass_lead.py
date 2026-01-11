@@ -17,22 +17,30 @@ def test_pass_lead_endpoint():
     
     print("🔍 Testing Pass Lead Endpoint Flow...")
     
-    # Step 1: Login as guest and create a lead
-    print("Step 1: Creating lead as guest...")
+    # Step 1: Login as mentor to get their events
+    print("Step 1: Getting mentor events...")
+    response = session.post(f"{base_url}/api/auth/login", json=mentor_creds)
+    if response.status_code != 200:
+        print(f"❌ Failed to login as mentor: {response.status_code}")
+        return False
+    
+    # Get mentor events
+    response = session.get(f"{base_url}/api/mentor/events")
+    if response.status_code != 200 or not response.json():
+        print(f"❌ Failed to get mentor events: {response.status_code}")
+        return False
+    
+    mentor_events = response.json()
+    test_event = mentor_events[0]  # Use first event from this mentor
+    test_event_id = test_event["event_id"]
+    print(f"✅ Using mentor event: {test_event_id} - {test_event.get('title')}")
+    
+    # Step 2: Login as guest and create a lead
+    print("Step 2: Creating lead as guest...")
     response = session.post(f"{base_url}/api/auth/login", json=user_creds)
     if response.status_code != 200:
         print(f"❌ Failed to login as guest: {response.status_code}")
         return False
-    
-    # Get events
-    response = session.get(f"{base_url}/api/events")
-    if response.status_code != 200 or not response.json():
-        print(f"❌ Failed to get events: {response.status_code}")
-        return False
-    
-    events = response.json()
-    test_event = events[0]
-    test_event_id = test_event["event_id"]
     
     # Create booking
     timestamp = datetime.now().strftime('%H%M%S')
@@ -53,8 +61,8 @@ def test_pass_lead_endpoint():
     lead_id = result.get('lead_id')
     print(f"✅ Created lead: {lead_id}")
     
-    # Step 2: Login as admin and verify lead
-    print("Step 2: Verifying lead as admin...")
+    # Step 3: Login as admin and verify lead
+    print("Step 3: Verifying lead as admin...")
     response = session.post(f"{base_url}/api/auth/login", json=admin_creds)
     if response.status_code != 200:
         print(f"❌ Failed to login as admin: {response.status_code}")
@@ -69,8 +77,8 @@ def test_pass_lead_endpoint():
     
     print(f"✅ Verified lead: {lead_id}")
     
-    # Step 3: Login as mentor and purchase lead
-    print("Step 3: Purchasing lead as mentor...")
+    # Step 4: Login as mentor and purchase lead
+    print("Step 4: Purchasing lead as mentor...")
     response = session.post(f"{base_url}/api/auth/login", json=mentor_creds)
     if response.status_code != 200:
         print(f"❌ Failed to login as mentor: {response.status_code}")
@@ -119,8 +127,8 @@ def test_pass_lead_endpoint():
     
     print(f"✅ Completed payment for lead: {lead_id}")
     
-    # Step 4: Test the PASS endpoint
-    print("Step 4: Testing PASS endpoint...")
+    # Step 5: Test the PASS endpoint
+    print("Step 5: Testing PASS endpoint...")
     response = session.post(f"{base_url}/api/mentor/leads/{lead_id}/pass")
     if response.status_code != 200:
         print(f"❌ Failed to pass lead: {response.status_code}")
@@ -130,8 +138,8 @@ def test_pass_lead_endpoint():
     pass_result = response.json()
     print(f"✅ Pass endpoint successful: {pass_result}")
     
-    # Step 5: Verify lead status changed
-    print("Step 5: Verifying lead status...")
+    # Step 6: Verify lead status changed
+    print("Step 6: Verifying lead status...")
     response = session.get(f"{base_url}/api/mentor/leads")
     if response.status_code != 200:
         print(f"❌ Failed to get leads after pass: {response.status_code}")
