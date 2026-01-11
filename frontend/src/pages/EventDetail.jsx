@@ -8,16 +8,16 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { Calendar, Clock, Users, MapPin, ArrowLeft, ArrowRight, CheckCircle, Star, Share2 } from 'lucide-react';
+import { Calendar, Clock, Users, ArrowLeft, ArrowRight, CheckCircle, Star, Share2, Utensils, Heart, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const EVENT_IMAGES = [
-  'https://images.unsplash.com/photo-1670899460364-ebc917bac09a?w=1200&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1758272133417-011aebb36018?w=1200&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1715860738421-b30b98f8614f?w=1200&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1714038918910-daa51af9fccd?w=1200&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=1200&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1200&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1200&h=600&fit=crop',
 ];
 
 function EventDetail() {
@@ -91,7 +91,7 @@ function EventDetail() {
         },
         { withCredentials: true }
       );
-      toast.success('🎉 Application submitted! The host will review and get back to you.');
+      toast.success('Application submitted! The host will review and get back to you.');
       setShowApplyDialog(false);
       navigate('/user/dashboard');
     } catch (error) {
@@ -103,10 +103,10 @@ function EventDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-cream-50">
         <Navbar />
         <div className="flex justify-center items-center py-40">
-          <div className="w-16 h-16 border-4 border-coral-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-3 border-navy-200 border-t-navy-600 rounded-full animate-spin"></div>
         </div>
       </div>
     );
@@ -118,54 +118,52 @@ function EventDetail() {
   const imageIndex = Math.abs(event.event_id?.charCodeAt(0) || 0) % EVENT_IMAGES.length;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-50">
       <Navbar />
       
       {/* Back Button */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-6">
-        <Link to="/events" className="inline-flex items-center gap-2 text-navy-600 hover:text-coral-500 transition-colors">
+        <Link to="/events" className="inline-flex items-center gap-2 text-navy-600 hover:text-navy-900 transition-colors">
           <ArrowLeft className="w-5 h-5" />
-          <span className="font-semibold">Back to Events</span>
+          <span className="font-medium">Back to Events</span>
         </Link>
       </div>
 
       {/* Hero Image */}
-      <section className="relative h-[400px] md:h-[500px] overflow-hidden">
+      <section className="relative h-[400px] md:h-[480px] overflow-hidden mx-6 md:mx-12 rounded-2xl">
         <img 
           src={EVENT_IMAGES[imageIndex]} 
           alt={event.title}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-navy-900/30 to-transparent"></div>
         
         {/* Category Badge */}
-        <div className="absolute top-6 left-6 md:left-12">
-          <span className="px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm font-bold text-navy-900">
+        <div className="absolute top-6 left-6">
+          <span className="px-4 py-2 rounded-xl bg-white/90 backdrop-blur-sm font-medium text-navy-900">
             {event.category || 'Experience'}
           </span>
         </div>
         
         {/* Share Button */}
-        <button className="absolute top-6 right-6 md:right-12 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors">
+        <button className="absolute top-6 right-6 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white transition-colors">
           <Share2 className="w-5 h-5 text-navy-900" />
         </button>
         
         {/* Title Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-              {event.title}
-            </h1>
-            <div className="flex flex-wrap items-center gap-4 text-white/90">
-              <span className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                {eventDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-              </span>
-              <span className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                {eventDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+          <h1 className="text-3xl md:text-5xl font-heading text-white mb-4">
+            {event.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-4 text-white/90">
+            <span className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              {eventDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </span>
+            <span className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              {eventDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+            </span>
           </div>
         </div>
       </section>
@@ -178,26 +176,26 @@ function EventDetail() {
             <div className="lg:col-span-2 space-y-8">
               {/* Description */}
               <div>
-                <h2 className="text-2xl font-bold text-navy-900 mb-4">About this experience</h2>
+                <h2 className="text-2xl font-heading text-navy-900 mb-4">About this experience</h2>
                 <p className="text-lg text-navy-600 leading-relaxed">
                   {event.description}
                 </p>
               </div>
 
               {/* What to Expect */}
-              <div className="bg-navy-50 rounded-3xl p-8">
-                <h3 className="text-xl font-bold text-navy-900 mb-6">What to expect 🎯</h3>
+              <div className="bg-cream-100 rounded-2xl p-8">
+                <h3 className="text-xl font-heading text-navy-900 mb-6">What to expect</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
-                    { icon: '🍽️', text: 'Curated dining experience' },
-                    { icon: '👥', text: 'Interesting, like-minded guests' },
-                    { icon: '💬', text: 'Meaningful conversations' },
-                    { icon: '🎉', text: 'New connections & friendships' },
-                    { icon: '📸', text: 'Memorable moments' },
-                    { icon: '✨', text: 'Unique experience' },
+                    { icon: Utensils, text: 'Curated dining experience' },
+                    { icon: Users, text: 'Interesting, like-minded guests' },
+                    { icon: MessageCircle, text: 'Meaningful conversations' },
+                    { icon: Heart, text: 'New connections & friendships' },
                   ].map((item, idx) => (
                     <div key={idx} className="flex items-center gap-3">
-                      <span className="text-2xl">{item.icon}</span>
+                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <item.icon className="w-5 h-5 text-navy-600" />
+                      </div>
                       <span className="text-navy-700">{item.text}</span>
                     </div>
                   ))}
@@ -205,15 +203,15 @@ function EventDetail() {
               </div>
 
               {/* Host Info */}
-              <div className="border border-navy-200 rounded-3xl p-8">
-                <h3 className="text-xl font-bold text-navy-900 mb-6">Meet your host</h3>
+              <div className="border border-cream-200 rounded-2xl p-8">
+                <h3 className="text-xl font-heading text-navy-900 mb-6">Meet your host</h3>
                 <div className="flex items-start gap-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-coral-400 to-coral-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                  <div className="w-16 h-16 bg-pastel-blue rounded-xl flex items-center justify-center text-navy-700 text-2xl font-heading">
                     {event.mentor_name?.[0] || 'H'}
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-xl font-bold text-navy-900">{event.mentor_name}</h4>
-                    <div className="flex items-center gap-1 text-yellow-500 mt-1">
+                    <h4 className="text-xl font-heading text-navy-900">{event.mentor_name}</h4>
+                    <div className="flex items-center gap-1 text-amber-500 mt-1">
                       <Star className="w-4 h-4 fill-current" />
                       <Star className="w-4 h-4 fill-current" />
                       <Star className="w-4 h-4 fill-current" />
@@ -231,42 +229,42 @@ function EventDetail() {
 
             {/* Sidebar - Booking Card */}
             <div className="lg:col-span-1">
-              <div className="sticky top-8 bg-white border border-navy-200 rounded-3xl p-6 shadow-playful">
+              <div className="sticky top-24 bg-white border border-cream-200 rounded-2xl p-6 shadow-soft">
                 <div className="text-center mb-6">
-                  <span className="text-4xl font-extrabold text-navy-900">₹{event.price_per_lead}</span>
+                  <span className="text-4xl font-heading text-navy-900">₹{event.price_per_lead}</span>
                   <span className="text-navy-500 text-lg"> / person</span>
                 </div>
                 
                 <div className="space-y-4 mb-6">
-                  <div className="flex items-center justify-between py-3 border-b border-navy-100">
+                  <div className="flex items-center justify-between py-3 border-b border-cream-200">
                     <span className="flex items-center gap-2 text-navy-600">
-                      <Calendar className="w-5 h-5 text-coral-400" />
+                      <Calendar className="w-5 h-5 text-accent" />
                       Date
                     </span>
-                    <span className="font-semibold text-navy-900">
+                    <span className="font-medium text-navy-900">
                       {eventDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b border-navy-100">
+                  <div className="flex items-center justify-between py-3 border-b border-cream-200">
                     <span className="flex items-center gap-2 text-navy-600">
-                      <Clock className="w-5 h-5 text-coral-400" />
+                      <Clock className="w-5 h-5 text-accent" />
                       Duration
                     </span>
-                    <span className="font-semibold text-navy-900">{event.duration} mins</span>
+                    <span className="font-medium text-navy-900">{event.duration} mins</span>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b border-navy-100">
+                  <div className="flex items-center justify-between py-3 border-b border-cream-200">
                     <span className="flex items-center gap-2 text-navy-600">
-                      <Users className="w-5 h-5 text-coral-400" />
+                      <Users className="w-5 h-5 text-accent" />
                       Spots left
                     </span>
-                    <span className="font-semibold text-coral-500">{event.available_slots} available</span>
+                    <span className="font-medium text-navy-900">{event.available_slots} available</span>
                   </div>
                 </div>
 
                 <Button 
                   onClick={handleApply}
                   size="lg" 
-                  className="w-full rounded-full bg-coral-500 hover:bg-coral-600 text-white py-6 text-lg font-bold shadow-glow btn-playful"
+                  className="w-full rounded-xl bg-navy-900 hover:bg-navy-800 text-white py-6 text-base font-medium shadow-soft btn-soft"
                 >
                   Apply for this Event
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -277,14 +275,14 @@ function EventDetail() {
                 </p>
 
                 {/* Trust Indicators */}
-                <div className="mt-6 pt-6 border-t border-navy-100 space-y-3">
+                <div className="mt-6 pt-6 border-t border-cream-200 space-y-3">
                   {[
                     'Verified host',
                     'Secure payment',
                     'Full refund if not selected'
                   ].map((item, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-sm text-navy-600">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <CheckCircle className="w-4 h-4 text-pastel-blueDark" />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -297,22 +295,21 @@ function EventDetail() {
 
       {/* Application Dialog */}
       <Dialog open={showApplyDialog} onOpenChange={setShowApplyDialog}>
-        <DialogContent className="max-w-md rounded-3xl">
+        <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center">Apply for this Event 🎉</DialogTitle>
+            <DialogTitle className="text-2xl font-heading text-center">Apply for this Event</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div className="bg-navy-50 rounded-2xl p-4 mb-6">
-              <h4 className="font-bold text-navy-900">{event.title}</h4>
+            <div className="bg-cream-100 rounded-xl p-4 mb-6">
+              <h4 className="font-medium text-navy-900">{event.title}</h4>
               <p className="text-sm text-navy-500">
                 {eventDate.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
               </p>
             </div>
             
             <div>
-              <Label htmlFor="name" className="text-navy-900 font-semibold">Your Name *</Label>
+              <Label className="text-navy-900 font-medium">Your Name *</Label>
               <Input
-                id="name"
                 value={applicationForm.name}
                 onChange={(e) => setApplicationForm({ ...applicationForm, name: e.target.value })}
                 placeholder="Enter your full name"
@@ -321,9 +318,8 @@ function EventDetail() {
             </div>
             
             <div>
-              <Label htmlFor="email" className="text-navy-900 font-semibold">Email *</Label>
+              <Label className="text-navy-900 font-medium">Email *</Label>
               <Input
-                id="email"
                 type="email"
                 value={applicationForm.email}
                 onChange={(e) => setApplicationForm({ ...applicationForm, email: e.target.value })}
@@ -334,9 +330,8 @@ function EventDetail() {
             </div>
             
             <div>
-              <Label htmlFor="phone" className="text-navy-900 font-semibold">Phone Number *</Label>
+              <Label className="text-navy-900 font-medium">Phone Number *</Label>
               <Input
-                id="phone"
                 value={applicationForm.phone}
                 onChange={(e) => setApplicationForm({ ...applicationForm, phone: e.target.value })}
                 placeholder="Enter your phone number"
@@ -345,12 +340,11 @@ function EventDetail() {
             </div>
             
             <div>
-              <Label htmlFor="message" className="text-navy-900 font-semibold">Why do you want to attend? (optional)</Label>
+              <Label className="text-navy-900 font-medium">Why do you want to attend? (optional)</Label>
               <Textarea
-                id="message"
                 value={applicationForm.message}
                 onChange={(e) => setApplicationForm({ ...applicationForm, message: e.target.value })}
-                placeholder="Tell us a bit about yourself and why you're interested..."
+                placeholder="Tell us a bit about yourself..."
                 className="mt-2 rounded-xl"
                 rows={3}
               />
@@ -359,7 +353,7 @@ function EventDetail() {
             <Button
               onClick={submitApplication}
               disabled={applying}
-              className="w-full rounded-full bg-coral-500 hover:bg-coral-600 text-white py-6 text-lg font-bold mt-4"
+              className="w-full rounded-xl bg-navy-900 hover:bg-navy-800 text-white py-6 text-base font-medium mt-4"
             >
               {applying ? (
                 <span className="flex items-center gap-2">
