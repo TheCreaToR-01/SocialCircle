@@ -116,30 +116,39 @@ backend:
       - working: true
         agent: "main"
         comment: "Users can login immediately after registration, verify email later"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Registration sets email_verified=false but login works immediately. Users can access protected endpoints without email verification. Feature working correctly."
 
   - task: "Projected Revenue endpoint"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "New endpoint /api/mentor/leads/projected-revenue - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: GET /api/mentor/leads/projected-revenue returns correct structure with projected_data array, total_leads, total_potential_revenue. All fields have correct types and structure. Feature working correctly."
 
   - task: "Pass lead endpoint"
     implemented: true
-    working: NA
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: NA
         agent: "main"
         comment: "New endpoint /api/mentor/leads/{lead_id}/pass - sends rejection email"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: POST /api/mentor/leads/{lead_id}/pass works correctly. Lead status changes to PASSED, passed_at timestamp is set, rejection email is sent. RBAC working - users blocked from accessing endpoint. Feature working correctly."
 
 frontend:
   - task: "Playful Landing Page"
@@ -192,15 +201,14 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "2.0"
-  test_sequence: 2
+  version: "2.1"
+  test_sequence: 3
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Projected Revenue endpoint"
-    - "Pass lead endpoint"
     - "Host Dashboard - Invite/Pass buttons"
+    - "Host Dashboard - Projected Revenue"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -208,3 +216,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Implemented playful UI overhaul and backend updates. Test credentials - Host: chef.rajiv@thesocialcircle.in/host123, Guest: amit.tech@gmail.com/guest123. New features: 1) Login without verification, 2) Projected revenue for hosts, 3) Invite/Pass buttons for purchased leads (Pass sends rejection email). Events page has 20 events with category filters."
+  - agent: "testing"
+    message: "✅ BACKEND TESTING COMPLETE: All 3 new backend features tested and working correctly. 1) Login without email verification - users can login immediately after registration with email_verified=false. 2) Projected revenue endpoint - returns proper structure with projected_data array, total_leads, total_potential_revenue. 3) Pass lead endpoint - changes lead status to PASSED, sets timestamp, sends rejection email. Complete flow tested: guest applies → admin verifies → host purchases → host can invite OR pass. RBAC working correctly. Success rate: 96.4% (53/55 tests passed). Only minor non-critical failures in session management tests."
