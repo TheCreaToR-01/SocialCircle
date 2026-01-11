@@ -1312,7 +1312,7 @@ async def get_projected_revenue(user: User = Depends(get_current_user)):
     # Calculate projected revenue
     projected_data = []
     for event in events:
-        event_leads = [l for l in verified_leads if l["event_id"] == event["event_id"]]
+        event_leads = [lead for lead in verified_leads if lead["event_id"] == event["event_id"]]
         lead_count = len(event_leads)
         potential_revenue = lead_count * event.get("price_per_lead", 0)
         
