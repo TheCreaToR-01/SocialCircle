@@ -102,10 +102,10 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Build The Social Circle platform - a curated networking platform connecting Hosts and Guests for micro-events. Implement guest selection and ticketing flow."
+user_problem_statement: "Make The Social Circle platform playful like timeleft.com with Airbnb-style fonts, dedicated events page with filters, backend changes for login without verification, projected revenue for hosts, and Invite/Pass buttons for purchased leads."
 
 backend:
-  - task: "Events API - Public access"
+  - task: "Login without email verification"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -115,115 +115,96 @@ backend:
     status_history:
       - working: true
         agent: "main"
-        comment: "Events visible without login - verified via screenshot"
+        comment: "Users can login immediately after registration, verify email later"
 
-  - task: "Host invite guest endpoint"
+  - task: "Projected Revenue endpoint"
     implemented: true
-    working: true
+    working: NA
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: NA
         agent: "main"
-        comment: "New endpoint /api/mentor/leads/{lead_id}/invite - needs testing"
-      - working: true
-        agent: "testing"
-        comment: "✅ WORKING - POST /api/mentor/leads/{lead_id}/invite successfully creates invitations with ticket_price. Tested complete flow: host purchases lead → invites guest → invitation created with status PENDING. Verified in /api/mentor/invitations endpoint."
+        comment: "New endpoint /api/mentor/leads/projected-revenue - needs testing"
 
-  - task: "Guest invitations endpoint"
+  - task: "Pass lead endpoint"
     implemented: true
-    working: true
+    working: NA
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: NA
         agent: "main"
-        comment: "New endpoint /api/user/invitations - needs testing"
-      - working: true
-        agent: "testing"
-        comment: "✅ WORKING - GET /api/user/invitations returns all invitations for guest with complete event details, host info, and correct ticket pricing. Invitation status correctly shows PENDING before payment."
-
-  - task: "Guest ticket payment endpoint"
-    implemented: true
-    working: true
-    file: "/app/backend/server.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: NA
-        agent: "main"
-        comment: "New endpoints /api/user/invitations/{id}/pay and /api/user/ticket-payment-verify"
-      - working: true
-        agent: "testing"
-        comment: "✅ WORKING - Both endpoints function correctly. POST /api/user/invitations/{id}/pay initiates payment with demo code. POST /api/user/ticket-payment-verify completes payment, updates invitation status to PAID, creates ticket record, and updates lead status to CONFIRMED."
-
-  - task: "Guest tickets endpoint"
-    implemented: true
-    working: true
-    file: "/app/backend/server.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: NA
-        agent: "main"
-        comment: "New endpoint /api/user/tickets - needs testing"
-      - working: true
-        agent: "testing"
-        comment: "✅ WORKING - GET /api/user/tickets returns all confirmed tickets with complete event details, host information, ticket price, and CONFIRMED status. Ticket creation works correctly after payment verification."
+        comment: "New endpoint /api/mentor/leads/{lead_id}/pass - sends rejection email"
 
 frontend:
-  - task: "Host Dashboard - Invite Guest UI"
+  - task: "Playful Landing Page"
     implemented: true
     working: true
+    file: "/app/frontend/src/pages/Landing.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Airbnb-style fonts, coral accents, playful animations, image grid"
+
+  - task: "Dedicated Events Page with Filters"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Events.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Category filters, search, price range filter - 20 events showing"
+
+  - task: "Host Dashboard - Invite/Pass buttons"
+    implemented: true
+    working: NA
     file: "/app/frontend/src/pages/MentorDashboard.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: NA
         agent: "main"
-        comment: "Added invite button for purchased leads, invite dialog, invitations tab"
-      - working: true
-        agent: "testing"
-        comment: "✅ WORKING - Host Dashboard UI fully functional. All tabs working: Profile, Events, Leads, Invitations. Stats cards display correctly (Events: 3, Verified: 0, Purchased: 0, Invited: 0, Confirmed: 0). Invitations tab shows 2 sent invitations with 'Ticket Paid' status. Invite dialog functionality implemented (though no purchased leads available for testing). UI components render properly with correct data-testids."
+        comment: "Added Invite (green) and Pass (red) buttons for purchased leads"
 
-  - task: "Guest Dashboard - Invitations & Tickets UI"
+  - task: "Host Dashboard - Projected Revenue"
     implemented: true
-    working: true
-    file: "/app/frontend/src/pages/UserDashboard.jsx"
+    working: NA
+    file: "/app/frontend/src/pages/MentorDashboard.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: NA
         agent: "main"
-        comment: "Added invitations tab, ticket payment flow, tickets tab"
-      - working: true
-        agent: "testing"
-        comment: "✅ WORKING - Guest Dashboard UI fully functional. All tabs working: My Applications (3 applications), Invitations (2 invitations with 'Paid' status), My Tickets (2 confirmed tickets). Stats cards display correctly (Applications: 3, Invitations: 0 pending, Tickets: 2, Events Attended: 2). Payment flow implemented with demo payment gateway. Ticket details show complete information including host, ticket ID, amount paid (₹3500), and confirmed status."
+        comment: "Added projected revenue dialog accessible from verified leads stat card"
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
+  version: "2.0"
   test_sequence: 2
   run_ui: true
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Projected Revenue endpoint"
+    - "Pass lead endpoint"
+    - "Host Dashboard - Invite/Pass buttons"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Implemented guest selection and ticketing flow. Test credentials - Admin: admin@thesocialcircle.in/admin123, Host: chef.rajiv@thesocialcircle.in/host123, Guest: amit.tech@gmail.com/guest123. Flow: 1) Guest applies to event, 2) Admin verifies, 3) Host purchases lead, 4) Host invites guest, 5) Guest pays for ticket. Demo payment codes are used."
-  - agent: "testing"
-    message: "✅ BACKEND TESTING COMPLETE - All new ticketing endpoints working perfectly! Tested complete flow: Guest application → Admin verification → Host purchase → Host invite guest → Guest receives invitation → Guest pays for ticket → Ticket confirmed. All 4 new backend tasks (Host invite, Guest invitations, Guest ticket payment, Guest tickets) are fully functional. 95.6% test success rate (43/45 tests passed). Only minor issues: admin role display and event creation status code - both non-critical. Ready for frontend testing."
-  - agent: "testing"
-    message: "🎉 FRONTEND UI TESTING COMPLETE - All UI components working perfectly! Landing page displays events without login (Farm-to-Table Dinner Experience, Startup Founders Brunch visible). Host Dashboard: All tabs functional (Profile, Events, Leads, Invitations), stats cards accurate, invite dialog implemented. Guest Dashboard: All tabs working (My Applications: 3, Invitations: 2 paid, My Tickets: 2 confirmed), payment flow with demo gateway functional. Complete guest selection & ticketing flow UI is operational. No critical issues found."
+    message: "Implemented playful UI overhaul and backend updates. Test credentials - Host: chef.rajiv@thesocialcircle.in/host123, Guest: amit.tech@gmail.com/guest123. New features: 1) Login without verification, 2) Projected revenue for hosts, 3) Invite/Pass buttons for purchased leads (Pass sends rejection email). Events page has 20 events with category filters."
