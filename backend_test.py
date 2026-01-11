@@ -882,6 +882,12 @@ class LeadBridgeAPITester:
         # Run tests in logical order
         self.test_user_registration()
         self.test_authentication()
+        
+        # NEW FEATURES TESTING
+        self.test_login_without_email_verification()
+        self.test_projected_revenue_endpoint()
+        self.test_pass_lead_endpoint()
+        
         self.test_auth_me_endpoint()
         self.test_events_endpoints()
         self.test_mentor_profile_endpoints()
