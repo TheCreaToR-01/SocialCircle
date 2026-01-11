@@ -346,7 +346,7 @@ function Landing() {
             ].map((testimonial, idx) => (
               <div key={idx} className="bg-navy-50 rounded-3xl p-8 hover-lift">
                 <span className="text-4xl mb-4 block">{testimonial.emoji}</span>
-                <p className="text-navy-700 text-lg mb-6 italic">"{testimonial.quote}"</p>
+                <p className="text-navy-700 text-lg mb-6 italic">&ldquo;{testimonial.quote}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-coral-200 rounded-full flex items-center justify-center text-xl font-bold text-coral-700">
                     {testimonial.name[0]}
