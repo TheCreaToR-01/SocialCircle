@@ -385,6 +385,218 @@ class LeadBridgeAPITester:
         else:
             self.log_test("RBAC - User blocked from mentor", False, f"Status: {response.status_code}")
 
+    def test_login_without_email_verification(self):
+        """Test NEW FEATURE: Login without email verification"""
+        print("\n🔍 Testing Login Without Email Verification...")
+        
+        # Register a new user
+        timestamp = datetime.now().strftime('%H%M%S')
+        test_user_data = {
+            "name": f"Test User {timestamp}",
+            "email": f"testuser{timestamp}@example.com",
+            "password": "testpass123",
+            "role": "USER"
+        }
+        
+        success, response = self.make_request('POST', '/auth/register', test_user_data, expected_status=200)
+        if success:
+            register_result = response.json()
+            # Check that email_verified is false but registration succeeded
+            if register_result.get('email_verified') == False:
+                self.log_test("Registration with email_verified=false", True)
+                
+                # Now try to login immediately without verifying email
+                login_data = {
+                    "email": test_user_data["email"],
+                    "password": test_user_data["password"]
+                }
+                
+                success, response = self.make_request('POST', '/auth/login', login_data, expected_status=200)
+                if success:
+                    login_result = response.json()
+                    self.log_test("Login without email verification", True)
+                    
+                    # Verify we can access protected endpoints
+                    success, response = self.make_request('GET', '/auth/me')
+                    if success:
+                        me_result = response.json()
+                        if me_result.get('email') == test_user_data["email"]:
+                            self.log_test("Access protected endpoint without email verification", True)
+                        else:
+                            self.log_test("Access protected endpoint without email verification", False, "Wrong user data")
+                    else:
+                        self.log_test("Access protected endpoint without email verification", False, f"Status: {response.status_code}")
+                else:
+                    self.log_test("Login without email verification", False, f"Status: {response.status_code}")
+            else:
+                self.log_test("Registration with email_verified=false", False, f"email_verified: {register_result.get('email_verified')}")
+        else:
+            self.log_test("Registration for login test", False, f"Status: {response.status_code}")
+
+    def test_projected_revenue_endpoint(self):
+        """Test NEW FEATURE: Projected revenue endpoint"""
+        print("\n🔍 Testing Projected Revenue Endpoint...")
+        
+        # Login as mentor/host
+        success, response = self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
+        if not success:
+            self.log_test("Projected Revenue Tests", False, "Failed to login as mentor")
+            return
+        
+        # Test the projected revenue endpoint
+        success, response = self.make_request('GET', '/mentor/leads/projected-revenue')
+        if success:
+            revenue_data = response.json()
+            
+            # Check response structure
+            required_fields = ['projected_data', 'total_leads', 'total_potential_revenue']
+            has_all_fields = all(field in revenue_data for field in required_fields)
+            
+            if has_all_fields:
+                self.log_test("Projected Revenue Endpoint Structure", True)
+                
+                # Check if projected_data is an array
+                if isinstance(revenue_data.get('projected_data'), list):
+                    self.log_test("Projected Revenue Data Array", True)
+                    
+                    # Check numeric fields
+                    total_leads = revenue_data.get('total_leads', 0)
+                    total_revenue = revenue_data.get('total_potential_revenue', 0)
+                    
+                    if isinstance(total_leads, int) and isinstance(total_revenue, (int, float)):
+                        self.log_test("Projected Revenue Numeric Fields", True)
+                        
+                        # If we have projected data, check structure
+                        projected_data = revenue_data.get('projected_data', [])
+                        if projected_data:
+                            first_item = projected_data[0]
+                            item_fields = ['event_id', 'event_title', 'lead_count', 'price_per_lead', 'potential_revenue']
+                            has_item_fields = all(field in first_item for field in item_fields)
+                            
+                            if has_item_fields:
+                                self.log_test("Projected Revenue Item Structure", True)
+                            else:
+                                self.log_test("Projected Revenue Item Structure", False, f"Missing fields in item")
+                        else:
+                            self.log_test("Projected Revenue Item Structure", True, "No data items (acceptable)")
+                    else:
+                        self.log_test("Projected Revenue Numeric Fields", False, f"Invalid types: leads={type(total_leads)}, revenue={type(total_revenue)}")
+                else:
+                    self.log_test("Projected Revenue Data Array", False, f"projected_data type: {type(revenue_data.get('projected_data'))}")
+            else:
+                missing_fields = [field for field in required_fields if field not in revenue_data]
+                self.log_test("Projected Revenue Endpoint Structure", False, f"Missing fields: {missing_fields}")
+        else:
+            self.log_test("Projected Revenue Endpoint", False, f"Status: {response.status_code}")
+
+    def test_pass_lead_endpoint(self):
+        """Test NEW FEATURE: Pass lead endpoint"""
+        print("\n🔍 Testing Pass Lead Endpoint...")
+        
+        # First, we need to create a complete flow to get a purchased lead
+        # Step 1: Create a lead as guest
+        success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        if not success:
+            self.log_test("Pass Lead Tests", False, "Failed to login as guest")
+            return
+        
+        # Get an event to apply to
+        success, response = self.make_request('GET', '/events')
+        if not success or not response.json():
+            self.log_test("Pass Lead Tests", False, "No events available")
+            return
+        
+        events = response.json()
+        test_event = events[0]
+        test_event_id = test_event["event_id"]
+        
+        # Apply to event
+        timestamp = datetime.now().strftime('%H%M%S')
+        booking_data = {
+            "name": f"Pass Test User {timestamp}",
+            "email": f"passtest{timestamp}@example.com",
+            "phone": "9876543210",
+            "message": "Test application for pass functionality"
+        }
+        
+        success, response = self.make_request('POST', f'/events/{test_event_id}/book', booking_data)
+        if not success:
+            self.log_test("Pass Lead Tests", False, "Failed to create lead")
+            return
+        
+        result = response.json()
+        pass_test_lead_id = result.get('lead_id')
+        
+        # Step 2: Admin verifies the lead
+        success, response = self.make_request('POST', '/auth/login', self.admin_creds, expected_status=200)
+        if not success:
+            self.log_test("Pass Lead Tests", False, "Failed to login as admin")
+            return
+        
+        verify_data = {"status": "VERIFIED"}
+        success, response = self.make_request('PUT', f'/admin/leads/{pass_test_lead_id}/verify', verify_data)
+        if not success:
+            self.log_test("Pass Lead Tests", False, "Failed to verify lead")
+            return
+        
+        # Step 3: Host purchases the lead
+        success, response = self.make_request('POST', '/auth/login', self.mentor_creds, expected_status=200)
+        if not success:
+            self.log_test("Pass Lead Tests", False, "Failed to login as host")
+            return
+        
+        success, response = self.make_request('POST', f'/mentor/leads/{pass_test_lead_id}/purchase')
+        if not success:
+            self.log_test("Pass Lead Tests", False, "Failed to purchase lead")
+            return
+        
+        purchase_result = response.json()
+        demo_payment_code = purchase_result.get('demo_payment_code')
+        payment_id = purchase_result.get('payment_id')
+        
+        # Complete payment
+        payment_verify_data = {
+            "demo_payment_code": demo_payment_code,
+            "payment_id": payment_id
+        }
+        success, response = self.make_request('POST', '/mentor/payment-verify', payment_verify_data)
+        if not success:
+            self.log_test("Pass Lead Tests", False, "Failed to complete payment")
+            return
+        
+        # Step 4: Now test the PASS endpoint
+        success, response = self.make_request('POST', f'/mentor/leads/{pass_test_lead_id}/pass')
+        if success:
+            self.log_test("Pass Lead Endpoint", True)
+            
+            # Verify lead status changed to PASSED
+            success, response = self.make_request('GET', '/mentor/leads')
+            if success:
+                leads = response.json()
+                passed_lead = None
+                for lead in leads:
+                    if lead.get('lead_id') == pass_test_lead_id:
+                        passed_lead = lead
+                        break
+                
+                if passed_lead and passed_lead.get('status') == 'PASSED':
+                    self.log_test("Lead Status Changed to PASSED", True)
+                else:
+                    self.log_test("Lead Status Changed to PASSED", False, f"Status: {passed_lead.get('status') if passed_lead else 'Lead not found'}")
+            else:
+                self.log_test("Lead Status Changed to PASSED", False, f"Failed to get leads: {response.status_code}")
+        else:
+            self.log_test("Pass Lead Endpoint", False, f"Status: {response.status_code}")
+        
+        # Test unauthorized access (user trying to pass a lead)
+        success, response = self.make_request('POST', '/auth/login', self.user_creds, expected_status=200)
+        if success:
+            success, response = self.make_request('POST', f'/mentor/leads/{pass_test_lead_id}/pass', expected_status=403)
+            if success:
+                self.log_test("RBAC - User blocked from pass endpoint", True)
+            else:
+                self.log_test("RBAC - User blocked from pass endpoint", False, f"Status: {response.status_code}")
+
     def test_logout(self):
         """Test logout functionality"""
         print("\n🔍 Testing Logout...")
