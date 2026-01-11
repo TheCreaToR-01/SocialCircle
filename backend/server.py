@@ -48,6 +48,7 @@ class LeadStatus(str, Enum):
     VERIFIED = "VERIFIED"
     PURCHASED = "PURCHASED"
     INVITED = "INVITED"
+    PASSED = "PASSED"
     CONFIRMED = "CONFIRMED"
     REJECTED = "REJECTED"
 
