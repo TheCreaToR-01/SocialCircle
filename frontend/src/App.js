@@ -8,6 +8,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import UserDashboard from './pages/UserDashboard';
 import MentorDashboard from './pages/MentorDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import Events from './pages/Events';
 import EventDetail from './pages/EventDetail';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
@@ -32,6 +33,7 @@ function AppRouter() {
         <Route path="/user/dashboard" element={<UserDashboard />} />
         <Route path="/mentor/dashboard" element={<MentorDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/events" element={<Events />} />
         <Route path="/events/:eventId" element={<EventDetail />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-conditions" element={<TermsConditions />} />
