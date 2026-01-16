@@ -76,6 +76,97 @@ code {
   -webkit-backdrop-filter: blur(10px);
 }
 
+
+/* Hero Section Styles */
+.hero-section {
+  position: relative;
+}
+
+.hero-headline {
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.hero-icon {
+  vertical-align: middle;
+  display: inline-block;
+  margin-left: 0.5rem;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
+}
+
+.hero-cta-button {
+  background: linear-gradient(135deg, #ff8a65 0%, #ff6b9d 100%);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.hero-cta-button:hover {
+  background: linear-gradient(135deg, #ff7043 0%, #ff5a8a 100%);
+  box-shadow: 0 10px 30px rgba(255, 106, 157, 0.4);
+}
+
+/* Custom Section created by Kushagra Dubey */
+
+.eventSection{
+  width: 75vw;
+  margin: 50px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.eventSection .left{
+  width: 50%;
+  gap: 20px;
+}
+
+.eventSection .left h3{
+  font-size: 36px;
+}
+
+.eventSection .left p{
+  margin: 20px 0;
+}
+
+.eventSection .right{
+  width: 50%;
+}
+
+.eventSection .right img{
+  border-radius: 22px;
+}
+
+@media all and (max-width: 768px) {
+  .eventSection:nth-child(odd) {
+    flex-wrap: wrap;
+    flex-direction: column-reverse;
+}
+.eventSection{
+  flex-direction: column;
+
+}
+.eventSection .left{
+  width: 100%;
+}
+.eventSection .right{
+  width: 100%;
+}
+}
+
+
+
+.section-bg{
+  background: url("https://timeleft.com/wp-content/uploads/2025/10/img-party.png") rgba(0,0,0,0.8);
+  background-position: center;
+  background-size: cover;
+  border-radius: 50px;
+  margin: 20px 20px;
+}
+
 @layer base {
   :root {
     --background: 40 33% 98%;
@@ -107,5 +198,101 @@ code {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Auto-Scrolling Slideshow Styles */
+.slideshow-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+}
+
+.slideshow-track {
+  display: flex;
+  gap: 1.5rem;
+  animation: scroll 40s linear infinite;
+  will-change: transform;
+  width: max-content;
+}
+
+.slideshow-item {
+  flex-shrink: 0;
+  width: 280px; /* Fixed width for desktop - 4 images visible */
+  aspect-ratio: 4 / 3;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(10, 22, 40, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.slideshow-item:hover {
+  transform: scale(1.05);
+  z-index: 10;
+  position: relative;
+}
+
+.slideshow-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50%)); /* Move by exactly half (one complete set of images) */
+  }
+}
+
+/* Responsive adjustments */
+@media (min-width: 1280px) {
+  .slideshow-item {
+    width: 300px; /* Slightly larger on very wide screens */
+  }
+}
+
+@media (max-width: 1024px) {
+  .slideshow-item {
+    width: 240px; /* 3-4 images visible on tablet */
+  }
+  
+  .slideshow-track {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .slideshow-item {
+    width: calc(50vw - 2rem); /* 2 images on mobile */
+    min-width: 180px;
+  }
+  
+  .slideshow-track {
+    gap: 0.75rem;
+  }
+  
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-50%));
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .slideshow-item {
+    width: calc(50vw - 1.5rem); /* 2 images on small mobile */
+    min-width: 150px;
+  }
+  
+  .slideshow-track {
+    gap: 0.5rem;
   }
 }

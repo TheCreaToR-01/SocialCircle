@@ -3,7 +3,7 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
-import { ArrowRight, Users, Heart, Calendar, Clock, Star, Utensils, MessageCircle, Sparkles, Wine, Coffee, Palette, Briefcase, TrendingUp, Leaf } from 'lucide-react';
+import { ArrowRight, Users, Heart, Calendar, Clock, Star, Utensils, MessageCircle, Sparkles, Wine, Coffee, Palette, Briefcase, TrendingUp, Leaf, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -56,105 +56,69 @@ function Landing() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative py-20 md:py-28 overflow-hidden">
-        {/* Decorative shapes */}
-        <div className="absolute top-20 left-10 w-64 h-64 bg-pastel-blue rounded-full opacity-30 blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-80 h-80 bg-cream-300 rounded-full opacity-40 blur-3xl"></div>
+      <section className="relative min-h-[90vh] md:min-h-screen flex items-center overflow-hidden hero-section">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1920&h=1080&fit=crop&q=80" 
+            alt="Social gathering"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-navy-900/80 via-navy-900/65 to-navy-900/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-navy-900/30 to-transparent"></div>
+        </div>
         
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left Content */}
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 bg-pastel-blue/50 text-navy-700 rounded-full px-4 py-2 mb-6 text-sm font-medium">
-                <Sparkles className="w-4 h-4" />
-                Now hosting in Delhi NCR
-              </div>
-              
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading text-navy-900 leading-tight mb-6">
-                Where strangers
-                <span className="block text-navy-600 italic">become friends</span>
-                <span className="text-4xl md:text-5xl">over dinner</span>
-              </h1>
-              
-              <p className="text-lg text-navy-600 mb-8 max-w-xl leading-relaxed">
-                Curated micro-events that bring interesting people together. 
-                No awkward networking. Just real conversations and great food.
-              </p>
-              
-              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-                <Link to="/events">
-                  <Button size="lg" className="rounded-xl bg-navy-900 hover:bg-navy-800 text-white px-8 py-6 text-base font-medium shadow-soft-lg btn-soft">
-                    Find Your Table
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </Link>
-                <Link to="/signup">
-                  <Button size="lg" variant="outline" className="rounded-xl border-2 border-navy-300 text-navy-700 hover:bg-navy-50 px-8 py-6 text-base font-medium">
-                    Become a Host
-                  </Button>
-                </Link>
-              </div>
-              
-              {/* Stats */}
-              <div className="flex gap-10 mt-12 justify-center lg:justify-start">
-                <div>
-                  <p className="text-3xl font-heading text-navy-900">500+</p>
-                  <p className="text-navy-500 text-sm">Happy Guests</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-heading text-navy-900">50+</p>
-                  <p className="text-navy-500 text-sm">Events Hosted</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <p className="text-3xl font-heading text-navy-900">4.9</p>
-                  <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-                </div>
-              </div>
+        {/* Content Overlay */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 w-full">
+          <div className="max-w-2xl">
+            {/* Location */}
+            <div className="flex items-center gap-2 text-white mb-8 text-sm md:text-base">
+              <MapPin className="w-4 h-4 md:w-5 md:h-5" />
+              <span>• Delhi NCR</span>
             </div>
             
-            {/* Right - Image Grid */}
-            <div className="relative hidden lg:block">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <div className="rounded-2xl overflow-hidden shadow-soft-lg hover-lift h-48">
-                    <img src={EVENT_IMAGES[0]} alt="Dinner gathering" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="rounded-2xl overflow-hidden shadow-soft-lg hover-lift h-64 bg-pastel-blue/30 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <Wine className="w-12 h-12 text-navy-600 mx-auto mb-3" />
-                      <p className="font-heading text-xl text-navy-800">Curated Experiences</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4 pt-8">
-                  <div className="rounded-2xl overflow-hidden shadow-soft-lg hover-lift h-64">
-                    <img src={EVENT_IMAGES[1]} alt="Friends networking" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="rounded-2xl overflow-hidden shadow-soft-lg hover-lift h-48 bg-cream-200 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <Heart className="w-12 h-12 text-navy-600 mx-auto mb-3" />
-                      <p className="font-heading text-xl text-navy-800">Real Connections</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Floating card */}
-              <div className="absolute -left-6 top-1/2 -translate-y-1/2 bg-white rounded-xl shadow-soft-xl p-5 animate-float">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-pastel-sage rounded-xl flex items-center justify-center">
-                    <Users className="w-6 h-6 text-navy-700" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-navy-800">New friends made</p>
-                    <p className="text-2xl font-heading text-navy-900">2,500+</p>
-                  </div>
-                </div>
+            {/* Main Headline */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-8 hero-headline">
+              The weekly
+              <br />
+              gatherings
+              <br />
+              turning strangers
+              <br />
+              into friends
+              <span className="inline-block ml-3 hero-icon">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12">
+                  <circle cx="15" cy="20" r="8" fill="white" opacity="0.9"/>
+                  <circle cx="25" cy="20" r="8" fill="white" opacity="0.9"/>
+                </svg>
+              </span>
+            </h1>
+            
+            {/* CTA Button */}
+            <Link to="/events" className="inline-block mb-6">
+              <button className="hero-cta-button px-8 py-4 md:px-10 md:py-5 rounded-full text-white font-semibold text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                Find your group
+              </button>
+            </Link>
+            
+            {/* App Download Links */}
+            <div className="flex flex-col gap-2">
+              <p className="text-white text-sm md:text-base mb-2">or download our app</p>
+              <div className="flex items-center gap-4">
+                <a href="#" className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors">
+                  {/* Apple Logo */}
+                  <span className="text-white text-lg md:text-xl font-semibold">A</span>
+                </a>
+                <a href="#" className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors">
+                  {/* Google Play Logo */}
+                  <span className="text-white text-lg md:text-xl font-semibold">G</span>
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Featured Events Section */}
       <section className="py-20 bg-white">
@@ -257,6 +221,97 @@ function Landing() {
         </div>
       </section>
 
+
+
+
+      {/* Auto-Scrolling Image Slideshow */}
+      <section className="py-16 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <h2 className="text-4xl md:text-5xl font-heading text-navy-900 text-center mb-12">
+            Moments from Our Events
+          </h2>
+          
+          <div className="slideshow-container">
+            <div className="slideshow-track">
+              {/* First set of images */}
+              {EVENT_IMAGES.map((img, index) => (
+                <div key={`first-${index}`} className="slideshow-item">
+                  <img 
+                    src={img} 
+                    alt={`Event ${index + 1}`}
+                    className="slideshow-image"
+                  />
+                </div>
+              ))}
+              {/* Duplicate set for seamless loop */}
+              {EVENT_IMAGES.map((img, index) => (
+                <div key={`second-${index}`} className="slideshow-item">
+                  <img 
+                    src={img} 
+                    alt={`Event ${index + 1}`}
+                    className="slideshow-image"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* New Section */}
+      <section className='eventSection'>
+          <div className='left md'>
+            <h3>Dinners</h3>
+            <p>Make friends with five new faces over good food. Expect laughs, stories, and conversations that light you up.</p>
+            <Link to="/events">
+                  <Button size="lg" className="rounded-xl bg-navy-900 hover:bg-navy-800 text-white px-8 py-6 text-base font-medium shadow-soft-lg btn-soft">
+                    Book a Dinner
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+            </Link>
+          </div>
+          <div className="right md columns-3xl">
+            <img src="https://timeleft.com/wp-content/uploads/2025/10/DRINKS_01_1182.jpeg" alt="image" />
+          </div>
+      </section>
+
+
+            {/* New Section */}
+      <section className='eventSection'>
+                  <div className="right md columns-3xl">
+            <img src="https://timeleft.com/wp-content/uploads/2025/10/img-banner-ss-2.png" alt="image" />
+          </div>
+          <div className='left md'>
+            <h3>Drinks</h3>
+            <p>Meet new people in a casual bar setting. Drinks are super relaxed socials, perfect for low-key, low-cost, high-vibe meetups.</p>
+            <Link to="/events">
+                  <Button size="lg" className="rounded-xl bg-navy-900 hover:bg-navy-800 text-white px-8 py-6 text-base font-medium shadow-soft-lg btn-soft">
+                    Book Drinks
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+            </Link>
+          </div>
+      </section>
+
+
+                  {/* New Section */}
+      <section className='eventSection'>
+          <div className='left md'>
+            <h3>Runs</h3>
+            <p>Make friends pace-to-pace. Our runs are relaxed and easy, so you can enjoy chatting and connecting on the move.</p>
+            <Link to="/events">
+                  <Button size="lg" className="rounded-xl bg-navy-900 hover:bg-navy-800 text-white px-8 py-6 text-base font-medium shadow-soft-lg btn-soft">
+                    Book a Run
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+            </Link>
+          </div>
+          <div className="right md columns-3xl">
+            <img src="https://timeleft.com/wp-content/uploads/2025/10/img-banner-ss-3.png" alt="image" />
+          </div>
+      </section>
+
+
       {/* How It Works */}
       <section className="py-20 bg-cream-100">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -307,6 +362,113 @@ function Landing() {
           </div>
         </div>
       </section>
+
+
+
+
+        {/* Hero Section */}
+        <section className="relative py-20 md:py-28 overflow-hidden">
+        {/* Decorative shapes */}
+        <div className="absolute top-20 left-10 w-64 h-64 bg-pastel-blue rounded-full opacity-30 blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-80 h-80 bg-cream-300 rounded-full opacity-40 blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Content */}
+            <div className="text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-pastel-blue/50 text-navy-700 rounded-full px-4 py-2 mb-6 text-sm font-medium">
+                <Sparkles className="w-4 h-4" />
+                Now hosting in Delhi NCR
+              </div>
+              
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading text-navy-900 leading-tight mb-6">
+                Where strangers
+                <span className="block text-navy-600 italic">become friends</span>
+                <span className="text-4xl md:text-5xl">over dinner</span>
+              </h1>
+              
+              <p className="text-lg text-navy-600 mb-8 max-w-xl leading-relaxed">
+                Curated micro-events that bring interesting people together. 
+                No awkward networking. Just real conversations and great food.
+              </p>
+              
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <Link to="/events">
+                  <Button size="lg" className="rounded-xl bg-navy-900 hover:bg-navy-800 text-white px-8 py-6 text-base font-medium shadow-soft-lg btn-soft">
+                    Find Your Table
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button size="lg" variant="outline" className="rounded-xl border-2 border-navy-300 text-navy-700 hover:bg-navy-50 px-8 py-6 text-base font-medium">
+                    Become a Host
+                  </Button>
+                </Link>
+              </div>
+              
+              {/* Stats */}
+              <div className="flex gap-10 mt-12 justify-center lg:justify-start">
+                <div>
+                  <p className="text-3xl font-heading text-navy-900">500+</p>
+                  <p className="text-navy-500 text-sm">Happy Guests</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-heading text-navy-900">50+</p>
+                  <p className="text-navy-500 text-sm">Events Hosted</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <p className="text-3xl font-heading text-navy-900">4.9</p>
+                  <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Right - Image Grid */}
+            <div className="relative hidden lg:block">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="rounded-2xl overflow-hidden shadow-soft-lg hover-lift h-48">
+                    <img src={EVENT_IMAGES[0]} alt="Dinner gathering" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="rounded-2xl overflow-hidden shadow-soft-lg hover-lift h-64 bg-pastel-blue/30 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <Wine className="w-12 h-12 text-navy-600 mx-auto mb-3" />
+                      <p className="font-heading text-xl text-navy-800">Curated Experiences</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4 pt-8">
+                  <div className="rounded-2xl overflow-hidden shadow-soft-lg hover-lift h-64">
+                    <img src={EVENT_IMAGES[1]} alt="Friends networking" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="rounded-2xl overflow-hidden shadow-soft-lg hover-lift h-48 bg-cream-200 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <Heart className="w-12 h-12 text-navy-600 mx-auto mb-3" />
+                      <p className="font-heading text-xl text-navy-800">Real Connections</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Floating card */}
+              <div className="absolute -left-6 top-1/2 -translate-y-1/2 bg-white rounded-xl shadow-soft-xl p-5 animate-float">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-pastel-sage rounded-xl flex items-center justify-center">
+                    <Users className="w-6 h-6 text-navy-700" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-navy-800">New friends made</p>
+                    <p className="text-2xl font-heading text-navy-900">2,500+</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
 
       {/* Categories */}
       <section className="py-20 bg-white">
@@ -378,7 +540,7 @@ function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-navy-900 relative overflow-hidden">
+      <section className="py-20 bg-navy-900 relative overflow-hidden section-bg">
         {/* Decorative shapes */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-pastel-blue/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-cream-300/10 rounded-full blur-3xl"></div>
